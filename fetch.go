@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"net/url"
+	"distru/index"
 )
 
 //fetch a webpage from url (without http://)
@@ -43,10 +44,6 @@ func getLinks(html string) []string {
 		linkTexts[i] = links[i][1]
 	}
 	return (linkTexts)
-}
-
-func scrapeurl(content string) []string {
-	return(nil)
 }
 
 func main() {
