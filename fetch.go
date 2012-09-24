@@ -5,11 +5,19 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"net/url"
 )
 
 //fetch a webpage from url (without http://)
-func fetch(url string) string {
-	resp, err := http.Get("http://" + url) //make the request
+func fetch(path string) string {
+	accessURI, err := url.ParseRequestURI(path)
+	if err != nil {
+		accessURI, err = url.ParseRequestURI("http://" + path)
+		if err != nil {
+			os.Exit(1)
+		}
+	}
+	resp, err := http.Get(accessURI.String()) //make the request
 	if err != nil {            //if there's an error,
 		os.Exit(1) //then exit with error 1
 	}
@@ -19,29 +27,33 @@ func fetch(url string) string {
 	return (content)
 }
 
-func getLinks(html string) [][]string {
+//return all URLs in href attributes of the given HTML
+func getLinks(html string) []string {
 	tags, tagErr := regexp.Compile("href=['\"]?([^'\" >]+)")
 	if tagErr != nil {
-		os.Exit(1)
+		os.Exit(2)
 	}
 	
-	/*href, hrefErr := regexp.Compile("\\s*(?i)href\\s*=\\s*(\"([^\"]*\")|'[^']*'|([^'\">\\s]+))")
-	if hrefErr != nil {
-		os.Exit(1)
-	}*/
+	links := tags.FindAllStringSubmatch(html, -1)
 	
-	return (tags.FindAllStringSubmatch(html, -1))
+	linkTexts := make([]string, len(links))
+	
+	//We only want the second matched set [1], which does not contain 'http='
+	for i := range links {
+		linkTexts[i] = links[i][1]
+	}
+	return (linkTexts)
 }
 
 func scrapeurl(content string) []string {
 	return(nil)
-	}
+}
 
 func main() {
 	s := fetch(os.Args[1])
 	links := getLinks(s)
 	
 	for i := range links {
-		print(links[i][1], "\n")
+		print(links[i], "\n")
 	}
 }
