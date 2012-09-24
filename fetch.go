@@ -6,7 +6,6 @@ import (
 	"os"
 	"regexp"
 	"net/url"
-	"distru/index"
 )
 
 //fetch a webpage from url (without http://)
