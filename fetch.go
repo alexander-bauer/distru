@@ -52,4 +52,5 @@ func main() {
 	for i := range links {
 		print(links[i], "\n")
 	}
+	os.Exit(0)
 }
