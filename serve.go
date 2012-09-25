@@ -14,7 +14,7 @@ func handleBinary(w http.ResponseWriter, r *http.Request) {
 }
 
 func Serve() {
-    http.HandleFunc("/", handleReadable)
-    http.HandleFunc("/bin", handleBinary)
-    http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/", handleReadable)
+	http.HandleFunc("/bin", handleBinary)
+	http.ListenAndServe(":8080", nil)
 }
