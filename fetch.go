@@ -46,6 +46,9 @@ func getLinks(html string) []string {
 }
 
 func main() {
+	if os.Args[1] == "serve" {
+		serve()
+	}
 	s := fetch(os.Args[1])
 	links := getLinks(s)
 
