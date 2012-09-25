@@ -6,7 +6,7 @@ import (
 )
 
 func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hi there. This webpage is a response by <i>distru</i>, which is being run on the machine who's port you're looking at.\nGo is pretty cool.")
+    fmt.Fprintf(w, "<html><body>Hi there. This webpage is a response by <i>distru</i>, which is being run on the machine who's port you're looking at.\nGo is pretty cool.</body></html>")
 }
 
 func serve() {
