@@ -19,12 +19,24 @@ Then, it consults the word lists in the index, and displays sites with words sim
 When a site's tree of content is known, and all of the hyperlinks from those pages are known, and there is a word list for each of those pages, Distru has indexed that site. Distru's index is built of a list of indexed sites.
 
 ## To Use
+### Install Go
+Distru is written in Go, which is terribly easy to compile.
 
-Distru is written in Go, which is terribly easy to compile. As Distru nears a more-finished state, binaries will be available for download, of course. Until then, it can be downloaded and executed as follows.
-
-```
+#####Linux (Debian)
+```bash
 sudo apt-get install golang
+```
+#####Mac OS X
+If you don't already have Homebrew installed, view [this](http://mxcl.github.com/homebrew/) and install it.
+```bash
+brew install go
+```
 
+###Get Files
+
+As Distru nears a more-finished state, binaries will be available for download, of course. Until then, it can be downloaded and executed as follows.
+
+```bash
 git clone git@github.com:SashaCrofter/distru.git
 cd distru
 go build
