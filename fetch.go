@@ -1,4 +1,4 @@
-package distru
+package main
 
 import (
 	"io/ioutil"

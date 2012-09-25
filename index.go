@@ -1,7 +1,7 @@
-package distru
+package main
 
 type Index struct {
-	Pages []site //list of indexed webpages
+	Sites []site //list of indexed webpages
 }
 
 type site struct {
@@ -15,7 +15,32 @@ type sitePage struct {
 	Content string   //the content, temporarily replacing word lists
 }
 
-//sitePage constructor, which scrapes a webpage
+func NewIndex() *Index {
+	
+	//get peer list here TODO
+	
+	peerList := []string{"fc99:02f4:7795:c86c:36bd:63ae:cf49:d459"}
+	peerSites := []site{*newSite(peerList[1])}
+	
+	index := Index{
+		Sites: peerSites,
+	}
+	return &index
+}
+
+func newSite(url string) *site {
+	pages := []sitePage{*newSitePage(url)} //make an array of length 1
+	//by scraping the site's page
+	//TODO this should build the whole tree
+
+	site := site{
+		URL:   url,
+		Pages: pages,
+	}
+	return &site
+}
+
+//sitePage constructor, which scrapes a single webpage
 func newSitePage(url string) *sitePage {
 	body := fetch(url)      //get the body of the webpage
 	links := getLinks(body) //get the links, as well
@@ -28,6 +53,5 @@ func newSitePage(url string) *sitePage {
 		Links:   links,
 		Content: body,
 	}
-
 	return &page
 }
