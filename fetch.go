@@ -3,9 +3,9 @@ package distru
 import (
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"regexp"
-	"net/url"
 )
 
 //fetch a webpage from url (without http://)
@@ -18,7 +18,7 @@ func fetch(path string) string {
 		}
 	}
 	resp, err := http.Get(accessURI.String()) //make the request
-	if err != nil {            //if there's an error,
+	if err != nil {                           //if there's an error,
 		os.Exit(1) //then exit with error 1
 	}
 	defer resp.Body.Close()                //(not sure what this does)
@@ -33,11 +33,11 @@ func getLinks(html string) []string {
 	if tagErr != nil {
 		os.Exit(2)
 	}
-	
+
 	links := tags.FindAllStringSubmatch(html, -1)
-	
+
 	linkTexts := make([]string, len(links))
-	
+
 	//We only want the second matched set [1], which does not contain 'http='
 	for i := range links {
 		linkTexts[i] = links[i][1]
@@ -48,7 +48,7 @@ func getLinks(html string) []string {
 func main() {
 	s := fetch(os.Args[1])
 	links := getLinks(s)
-	
+
 	for i := range links {
 		print(links[i], "\n")
 	}
