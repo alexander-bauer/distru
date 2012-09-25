@@ -1,4 +1,4 @@
-package main
+package distru
 
 type Index struct {
 	Pages []site //list of indexed webpages
