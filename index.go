@@ -19,8 +19,8 @@ func NewIndex() *Index {
 	
 	//get peer list here TODO
 	
-	peerList := []string{"fc99:02f4:7795:c86c:36bd:63ae:cf49:d459"}
-	peerSites := []site{*newSite(peerList[1])}
+	peerList := []string{"example.com"}
+	peerSites := []site{*newSite(peerList[0])}
 	
 	index := Index{
 		Sites: peerSites,

@@ -1,7 +1,10 @@
 package main
 
-import "fmt"
 
-func PrintIndex(index *Index) {
-	fmt.Println(index.Sites[1].URL)
+/*func BinIndex(index *Index) []byte {
+	
+}*/
+
+func RepIndex(index *Index) string {
+	return "Got here."
 }
