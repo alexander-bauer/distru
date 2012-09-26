@@ -4,5 +4,5 @@ import "testing"
 
 func TestIndex(t *testing.T) {
 	index := NewIndex()
-	PrintIndex(index)
+	print(RepIndex(index))
 }
