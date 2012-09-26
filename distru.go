@@ -2,6 +2,8 @@ package main
 
 import "os"
 
+var Idx = NewIndex()
+
 func main() {
 	s := fetch(os.Args[1])
 	links := getLinks(s)

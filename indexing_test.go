@@ -1,9 +1,8 @@
 package main
 
-
 import "testing"
-
-func TestIndex(t *testing.T) {
+/*
+func TestSave(t *testing.T) {
 	index := NewIndex()
-	print(RepIndex(index))
-}
+	index.save("/tmp/distru-index")
+}*/
