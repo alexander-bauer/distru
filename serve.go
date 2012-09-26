@@ -10,7 +10,6 @@ import (
 func handleReadable(w http.ResponseWriter, r *http.Request) {
 	s := RepIndex(NewIndex())
 	fmt.Fprintf(w, s)
-	print("/index/text access.\n") 
 }
 
 func handleBinary(w http.ResponseWriter, r *http.Request) {

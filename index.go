@@ -22,7 +22,7 @@ func NewIndex() *Index {
 	
 	//get peer list here TODO
 	
-	peerList := []string{"localhost","example.com"}
+	peerList := []string{"localhost","uppit.us","example.com"}
 	peerSites := make([]site, len(peerList))
 	
 	for i := range peerList {
