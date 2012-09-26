@@ -5,8 +5,12 @@ import (
 	"net/http"
 )
 
+//the root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
+
 func handleReadable(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<html><body>Hi there. This webpage is a response by <i>Distru</i>, which is being run on the machine who's port you're looking at.\nGo is pretty cool.</body></html>")
+	s := RepIndex(NewIndex())
+	fmt.Fprintf(w, s)
+	print("/index/text access.\n") 
 }
 
 func handleBinary(w http.ResponseWriter, r *http.Request) {
@@ -14,7 +18,7 @@ func handleBinary(w http.ResponseWriter, r *http.Request) {
 }
 
 func Serve() {
-	http.HandleFunc("/", handleReadable)
-	http.HandleFunc("/bin", handleBinary)
+	http.HandleFunc("/index/text", handleReadable)
+	http.HandleFunc("/index/bin", handleBinary)
 	http.ListenAndServe(":8080", nil)
 }
