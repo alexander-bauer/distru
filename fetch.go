@@ -20,7 +20,8 @@ func fetch(path string) string {
 	}
 	resp, err := http.Get(accessURI.String()) //make the request
 	if err != nil {                           //if there's an error,
-		os.Exit(1) //then exit with error 1
+		//os.Exit(1) //then exit with error 1
+		return "No Content"
 	}
 	defer resp.Body.Close()                //(not sure what this does)
 	body, err := ioutil.ReadAll(resp.Body) //get the body of the request in []byte form
