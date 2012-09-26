@@ -1,8 +1,14 @@
 package main
 
-/*func BinIndex(index *Index) []byte {
+import (
+	"io"
+	"encoding/gob"
+)
 
-}*/
+func BinIndex(w io.Writer, index *Index) {
+	encoder := gob.NewEncoder(w)
+	encoder.Encode(index)
+}
 
 func RepIndex(index *Index) string {
 	s := "Index:\n"

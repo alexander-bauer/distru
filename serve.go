@@ -13,7 +13,8 @@ func handleReadable(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleBinary(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "<html><body>This page will be binary encoded for use by other instances of <i>Distru</i>.</body></html>")
+	print("Bin request")
+	BinIndex(w, Idx)
 }
 
 func Serve() {
