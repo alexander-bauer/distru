@@ -12,6 +12,9 @@ func RepIndex(index *Index) string {
 		s += index.Sites[i].URL + "\n"
 		for j := 0; j < len(index.Sites[i].Pages); j++ {
 			s += "\t" + index.Sites[i].Pages[j].Path + "\n"
+			for k := range index.Sites[i].Pages[j].Links {
+				s += "\t\t" + index.Sites[i].Pages[j].Links[k] + "\n"
+			}
 		}
 	}
 	
