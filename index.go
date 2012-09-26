@@ -57,7 +57,8 @@ func newSite(url string) *site {
 //sitePage constructor, which scrapes a single webpage
 func newSitePage(url string) *sitePage {
 	body := fetch(url)      //get the body of the webpage
-	links := getLinks(body) //get the links, as well
+	allLinks := getLinks(body) //collect links, but
+	links := getExternalLinks(allLinks) //get only the external links
 
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
