@@ -8,9 +8,9 @@ package main
 func RepIndex(index *Index) string {
 	s := "Index:\n"
 	
-	for i := 0; i < len(index.Sites); i++ {
+	for i := range index.Sites {
 		s += index.Sites[i].URL + "\n"
-		for j := 0; j < len(index.Sites[i].Pages); j++ {
+		for j := range index.Sites[i].Pages {
 			s += "\t" + index.Sites[i].Pages[j].Path + "\n"
 			for k := range index.Sites[i].Pages[j].Links {
 				s += "\t\t" + index.Sites[i].Pages[j].Links[k] + "\n"
