@@ -2,6 +2,8 @@ package main
 
 import "os"
 
+var Idx = NewIndex()
+
 func main() {
 	if os.Args[1] == "serve" {
 		Serve()

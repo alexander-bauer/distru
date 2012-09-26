@@ -1,5 +1,7 @@
 package main
 
+//import "io/ioutil"
+
 type Index struct {
 	Sites []site //list of indexed webpages
 }
@@ -15,18 +17,30 @@ type sitePage struct {
 	Content string   //the content, temporarily replacing word lists
 }
 
+//NewIndex is a constructor for the Index struct
 func NewIndex() *Index {
 	
 	//get peer list here TODO
 	
-	peerList := []string{"example.com"}
-	peerSites := []site{*newSite(peerList[0])}
+	peerList := []string{"localhost","example.com"}
+	peerSites := make([]site, len(peerList))
+	
+	for i := range peerList {
+		peerSites[i] = *newSite(peerList[i])
+	}
 	
 	index := Index{
 		Sites: peerSites,
 	}
 	return &index
 }
+
+/*
+func (index *Index) save(path string) error {
+	binary := byte(index)
+	return ioutil.WriteFile(path, index, 0600)
+}*/
+
 
 func newSite(url string) *site {
 	pages := []sitePage{*newSitePage(url)} //make an array of length 1
