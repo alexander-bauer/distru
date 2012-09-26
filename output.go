@@ -1,13 +1,12 @@
 package main
 
-
 /*func BinIndex(index *Index) []byte {
-	
+
 }*/
 
 func RepIndex(index *Index) string {
 	s := "Index:\n"
-	
+
 	for i := range index.Sites {
 		s += index.Sites[i].URL + "\n"
 		for j := range index.Sites[i].Pages {
@@ -17,6 +16,6 @@ func RepIndex(index *Index) string {
 			}
 		}
 	}
-	
+
 	return s + "\n\n"
 }
