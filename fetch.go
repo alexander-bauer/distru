@@ -65,7 +65,7 @@ func getInternalLinks(links []string, s string) []string {
 	return (internal)
 }
 
-func getExternalLinks(links []string, s string) []string {
+func getExternalLinks(links []string) []string {
 	ex := [999]string{} //eventually we need to change the "999"
 	excount := 0
 
@@ -89,7 +89,7 @@ func main() {
 	links := getLinks(s)
 
 	internal := getInternalLinks(links, s)
-	external := getExternalLinks(links, s)
+	external := getExternalLinks(links)
 
 	print("Internal Links:\n")
 	for i := range internal {
