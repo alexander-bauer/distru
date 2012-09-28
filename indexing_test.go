@@ -3,7 +3,7 @@ package main
 import "testing"
 
 func TestBin(t *testing.T) {
-	fetchIndex("http://localhost")
+	fetchIndex("localhost")
 }
 
 /*func TestRep(t *testing.T) {

@@ -1,24 +1,34 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
+	"net"
+	"bufio"
+	"os"
+	"log"
 )
 
 //the root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
 
-func handleReadable(w http.ResponseWriter, r *http.Request) {
-	s := RepIndex(NewIndex())
-	fmt.Fprintf(w, s)
-}
+func handleBinary(conn net.Conn) {
+	w := bufio.NewWriter(conn)
 
-func handleBinary(w http.ResponseWriter, r *http.Request) {
-	print("Bin request")
 	BinIndex(w, Idx)
 }
 
 func Serve() {
-	http.HandleFunc("/index/text", handleReadable)
-	http.HandleFunc("/index/bin", handleBinary)
-	http.ListenAndServe(":9049", nil)
+	ln, err := net.Listen("tcp", ":9049")
+	if err != nil {
+		print("Could not start server.")
+		os.Exit(1)
+	}
+	print("Started server.\n")
+	
+	for {
+		conn, err := ln.Accept()
+		if err != nil {
+			print("Server error.")
+			os.Exit(1)
+		}
+		go handleBinary(conn)
+	}
 }
