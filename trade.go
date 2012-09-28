@@ -1,26 +1,26 @@
 package main
 
 import (
-	"encoding/gob"
-	"net"
 	"bufio"
+	"encoding/gob"
 	"io"
 	"log"
+	"net"
 )
 
 func RecvIndex(url string) *Index {
-	conn, err := net.Dial("tcp", url + ":9049")
+	conn, err := net.Dial("tcp", url+":9049")
 	if err != nil {
 		log.Println("No response from: " + url)
 		return &Index{}
 	}
-	
+
 	r := bufio.NewReader(conn)
-	
+
 	decoder := gob.NewDecoder(r)
 	index := &Index{}
 	decoder.Decode(index)
-	
+
 	return index
 }
 
