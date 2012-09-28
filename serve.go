@@ -17,7 +17,7 @@ func handleBinary(conn net.Conn) {
 func Serve() {
 	ln, err := net.Listen("tcp", ":9049")
 	if err != nil {
-		log.Fatal("Could not start server.")
+		log.Fatal("Could not start server: ", err)
 	}
 	log.Println("Started server.")
 
