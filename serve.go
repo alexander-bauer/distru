@@ -3,7 +3,6 @@ package main
 import (
 	"net"
 	"bufio"
-	"os"
 	"log"
 )
 
@@ -11,23 +10,21 @@ import (
 
 func handleBinary(conn net.Conn) {
 	w := bufio.NewWriter(conn)
-
-	BinIndex(w, Idx)
+	log.Println("Serving binary index.")
+	ServIndex(w, Idx)
 }
 
 func Serve() {
 	ln, err := net.Listen("tcp", ":9049")
 	if err != nil {
-		print("Could not start server.")
-		os.Exit(1)
+		log.Fatal("Could not start server.")
 	}
-	print("Started server.\n")
+	log.Println("Started server.")
 	
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
-			print("Server error.")
-			os.Exit(1)
+			log.Fatal("Server error.")
 		}
 		go handleBinary(conn)
 	}

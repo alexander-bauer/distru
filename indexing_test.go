@@ -1,9 +1,14 @@
 package main
 
-import "testing"
+import (
+	"testing"
+	"log"
+)
 
 func TestBin(t *testing.T) {
-	fetchIndex("localhost")
+	idx := RecvIndex("localhost")
+	log.Println("Recieved binary index.")
+	log.Println(RepIndex(idx))
 }
 
 /*func TestRep(t *testing.T) {
