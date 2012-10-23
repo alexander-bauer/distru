@@ -1,21 +1,28 @@
 package main
 
 import (
+	"encoding/gob"
 	"encoding/json"
+	"io"
 )
 
 type Index struct {
 	Sites []site //list of indexed webpages
 }
 
-//Index.JSON creates a JSON-encoded and tab indented string from the parent index.
+//Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
+func (index *Index) Gob(w io.Writer) {
+	gob.NewEncoder(w).Encode(Idx)
+}
+
+//Index.JSON creates a JSON-encoded (encoding/json) and tab indented string from the parent index.
 func (index *Index) JSON() string {
 	//We're going to marshal the parent index here with tab indentation
 	b, err := json.MarshalIndent(index, "", "\t")
 	if err != nil {
 		return "" //return a blank string if there's an error
 	}
-	
+
 	//Then return the []byte as converted to a string.
 	return string(b)
 }

@@ -28,12 +28,11 @@ func Serve() {
 
 //handleConn is the internal server function for distru. When it recieves a connection, it logs the RemoteAddr of the connection, then serves a gob of the in-memory index (Idx) to it. It closes the connection immediately afterward.
 func handleConn(conn net.Conn) {
-	w := bufio.NewWriter(conn)
+	//Log the call to this function,
 	log.Println("Serving bin index to: " + conn.RemoteAddr().String())
 
-	//Serve a gob to the new connection immediately.
-	encoder := gob.NewEncoder(w)
-	encoder.Encode(Idx)
+	//then serve a gob to the new connection immediately.
+	Idx.Gob(bufio.NewWriter(conn))
 }
 
 //RecvIndex tries to recieve an index gob from a distru server (on tcp port 9049) running on the given url. It returns an empty index if it fails to do so.
