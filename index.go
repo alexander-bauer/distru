@@ -1,7 +1,23 @@
 package main
 
+import (
+	"encoding/json"
+)
+
 type Index struct {
 	Sites []site //list of indexed webpages
+}
+
+//Index.JSON creates a JSON-encoded and tab indented string from the parent index.
+func (index *Index) JSON() string {
+	//We're going to marshal the parent index here with tab indentation
+	b, err := json.MarshalIndent(index, "", "\t")
+	if err != nil {
+		return "" //return a blank string if there's an error
+	}
+	
+	//Then return the []byte as converted to a string.
+	return string(b)
 }
 
 type site struct {

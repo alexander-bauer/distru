@@ -7,7 +7,7 @@ import (
 func TestBin(t *testing.T) {
 	idx := RecvIndex("localhost")
 	t.Log("Got index from localhost.")
-	t.Log(RepIndex(idx))
+	t.Log(idx.JSON())
 }
 
 /*func TestRep(t *testing.T) {
