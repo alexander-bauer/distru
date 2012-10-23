@@ -1,18 +1,16 @@
 package main
 
-//import "io/ioutil"
-
 type Index struct {
 	Sites []site //list of indexed webpages
 }
 
 type site struct {
-	URL   string     //the link that identifies this Block
-	Pages []sitePage //nonordered list of pages and their data on the server
+	URL   string //domain or IP that identifies this Block
+	Pages []page //nonordered list of pages and their data on the server
 	Tree  []string
 }
 
-type sitePage struct {
+type page struct {
 	Path      string   //path to page on the webserver (relative to root page)
 	Links     []string //list of hyperlinks on the page
 	Internals []string //list of internal links on the page
@@ -37,14 +35,8 @@ func NewIndex() *Index {
 	return &index
 }
 
-/*
-func (index *Index) save(path string) error {
-	binary := byte(index)
-	return ioutil.WriteFile(path, index, 0600)
-}*/
-
 func newSite(url string) *site {
-	pages := []sitePage{*newSitePage(url, "/")} //make an array of length 1
+	pages := []page{*newPage(url, "/")} //make an array of length 1
 	//by scraping the site's page
 	//TODO this should build the whole tree
 
@@ -56,11 +48,11 @@ func newSite(url string) *site {
 	return &site
 }
 
-//newSitePage is the sitePage constructor, which scrapes a single webpage
+//newPage is the site constructor, which scrapes a single webpage
 //it takes the URL of a site (without trailing /,) and a directory path, such
 //as / or /help.txt
 //It returns the sitePage object, as well as an array of internal links.
-func newSitePage(url string, path string) *sitePage {
+func newPage(url string, path string) *page {
 	body := fetch(url)                                //get the body of the webpage
 	allLinks := getLinks(body)                        //collect links, but
 	externalLinks := getExternalLinks(allLinks)       //get only the external links
@@ -69,11 +61,10 @@ func newSitePage(url string, path string) *sitePage {
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
 
-	page := sitePage{
+	return &page{
 		Path:      path,
 		Links:     externalLinks,
 		Internals: internalLinks,
 		Content:   body,
 	}
-	return &page
 }

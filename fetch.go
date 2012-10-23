@@ -9,11 +9,11 @@ import (
 	"strings"
 )
 
-//fetch a webpage from url (without http://)
-func fetch(path string) string {
-	accessURI, err := url.ParseRequestURI(path)
+//fetch uses http.Get to get the webpage from the given url, which for which the "http://" prefix is optional.
+func fetch(target string) string {
+	accessURI, err := url.ParseRequestURI(target)
 	if err != nil {
-		accessURI, err = url.ParseRequestURI("http://" + path)
+		accessURI, err = url.ParseRequestURI("http://" + target)
 		if err != nil {
 			os.Exit(1)
 		}
@@ -23,7 +23,7 @@ func fetch(path string) string {
 		//os.Exit(1) //then exit with error 1
 		return "No Content"
 	}
-	defer resp.Body.Close()                //(not sure what this does)
+	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body) //get the body of the request in []byte form
 	content := string(body)                //convert to string
 	return (content)

@@ -6,5 +6,5 @@ var Idx = NewIndex()
 
 func main() {
 	Serve()
-	os.Exit(0)
+	os.Exit(1)
 }

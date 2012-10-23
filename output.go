@@ -1,5 +1,6 @@
 package main
 
+//RepIndex creates a string from the given index, using a number of nested loops. It should probably use encoding instead.
 func RepIndex(index *Index) string {
 	s := "Index:\n"
 
