@@ -20,8 +20,10 @@ func Serve() {
 	if err != nil {
 		log.Fatal("Could not start server:", err)
 	}
-	log.Println("Started server.")
 
+	go ServeWeb()
+
+	log.Println("Starting search server.")
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -60,9 +62,6 @@ func handleConn(conn net.Conn) {
 			log.Println(prefix, "error serving json:", err)
 			conn.Close()
 			return
-		} else if req == "GET / HTTP/1." {
-			log.Println(prefix, "got http request")
-			//BUG (SashaCrofter): THIS ISN'T WORKING, YOU SHOULD FIX THIS.
 		}
 
 		//and flush it to the connection.
