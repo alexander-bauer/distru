@@ -1,6 +1,7 @@
 <body>
 	<div class = "name">Distru</div>
-	<form>
-	<input type="text" class="search" form="searchform" placeholder="Search distru"/>
+	<form action="/search/" method="post" name="search">
+	<input type="text" class="search" name="search" placeholder="Search distru"/>
+    <input type="submit" value="Submit the form!" name="search" class ="hidden"/>
 	</form>
 </body>
