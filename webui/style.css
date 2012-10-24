@@ -1,14 +1,14 @@
 @charset "UTF-8";
 
 body {
-	background: #b4ddb4;
-	background: -moz-radial-gradient(center, ellipse cover,  #b4ddb4 0%, #83c783 17%, #52b152 33%, #008a00 67%, #005700 83%, #002400 100%);
-	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#b4ddb4), color-stop(17%,#83c783), color-stop(33%,#52b152), color-stop(67%,#008a00), color-stop(83%,#005700), color-stop(100%,#002400));
-	background: -webkit-radial-gradient(center, ellipse cover,  #b4ddb4 0%,#83c783 17%,#52b152 33%,#008a00 67%,#005700 83%,#002400 100%);
-	background: -o-radial-gradient(center, ellipse cover,  #b4ddb4 0%,#83c783 17%,#52b152 33%,#008a00 67%,#005700 83%,#002400 100%);
-	background: -ms-radial-gradient(center, ellipse cover,  #b4ddb4 0%,#83c783 17%,#52b152 33%,#008a00 67%,#005700 83%,#002400 100%);
-	background: radial-gradient(ellipse at center,  #b4ddb4 0%,#83c783 17%,#52b152 33%,#008a00 67%,#005700 83%,#002400 100%);
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#b4ddb4', endColorstr='#002400',GradientType=1 );
+	background: rgb(254,255,255);
+	background: -moz-radial-gradient(center, ellipse cover,  rgba(254,255,255,1) 0%, rgba(221,241,249,1) 35%, rgba(129,188,211,1) 100%);
+	background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,rgba(254,255,255,1)), color-stop(35%,rgba(221,241,249,1)), color-stop(100%,rgba(129,188,211,1)));
+	background: -webkit-radial-gradient(center, ellipse cover,  rgba(254,255,255,1) 0%,rgba(221,241,249,1) 35%,rgba(129,188,211,1) 100%);
+	background: -o-radial-gradient(center, ellipse cover,  rgba(254,255,255,1) 0%,rgba(221,241,249,1) 35%,rgba(129,188,211,1) 100%);
+	background: -ms-radial-gradient(center, ellipse cover,  rgba(254,255,255,1) 0%,rgba(221,241,249,1) 35%,rgba(129,188,211,1) 100%);
+	background: radial-gradient(ellipse at center,  rgba(254,255,255,1) 0%,rgba(221,241,249,1) 35%,rgba(129,188,211,1) 100%);
+	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#feffff', endColorstr='#81bcd3',GradientType=1 );
 	margin: 0;
 }
 
