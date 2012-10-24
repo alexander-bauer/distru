@@ -8,12 +8,17 @@ import (
 )
 
 func ServeWeb() {
-	http.HandleFunc("/", searchHandler)
+	http.HandleFunc("/search/", searchHandler)
+	http.HandleFunc("/", frontpageHandler)
 	log.Println("Starting webserver.")
 	http.ListenAndServe(":9048", nil)
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
+	
+}
+
+func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	//add the <html> element
 	s := "<html>"
 	fmt.Fprint(w, s)
