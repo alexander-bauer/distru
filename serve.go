@@ -61,6 +61,9 @@ func handleConn(conn net.Conn) {
 			log.Println(prefix, "error serving json:", err)
 			conn.Close()
 			return
+		} else if req == "GET / HTTP/1." {
+			log.Println(prefix, "got http request")
+			//BUG (SashaCrofter): THIS ISN'T WORKING, YOU SHOULD FIX THIS.
 		}
 
 		//and flush it to the connection.
