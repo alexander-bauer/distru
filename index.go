@@ -123,13 +123,13 @@ func newPage(target string, path string) *page {
 		//tags is an array containing both the "href=" and the link
 		link := tags[i][1] //so we take only the link element
 
-		if !strings.Contains(link, "http://") {
+		if !strings.Contains(link, "http://") && !strings.Contains(link, "https://") {
 			//If the string doesn't contain http://,
 			//put it in the internal section
 			internalLinks = append(internalLinks, link)
 		} else {
 			//otherwise, put it in externals
-			internalLinks = append(externalLinks, link)
+			externalLinks = append(externalLinks, link)
 		}
 	}
 
