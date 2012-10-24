@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	GETGOB  = "distru gob."  //Requests a gob of the current index.
-	GETJSON = "distru json." //Requests a json-encoded current index.
+	GETGOB  = "distru gob\r\n"  //Requests a gob of the current index.
+	GETJSON = "distru json\r\n" //Requests a json-encoded current index.
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
@@ -40,13 +40,12 @@ func handleConn(conn net.Conn) {
 	//Going to check the request here, so create a new reader and writer
 	r := bufio.NewReader(conn)
 	w := bufio.NewWriter(conn)
-	//and then read until we get a '.'
-	b, err := r.ReadBytes('.')
+	//and then read until we get a '\n', which should be preceded by '\r'
+	b, err := r.ReadBytes('\n')
 	if err != nil {
 		log.Println(prefix, err)
 		conn.Close()
 	}
-	//Convert the []byte recieved to a string, for convenience
 	req := string(b)
 
 	if req == GETGOB {
@@ -73,7 +72,8 @@ func handleConn(conn net.Conn) {
 		conn.Close()
 		log.Println(prefix, "served json")
 	} else {
-		log.Println(prefix, "invalid request: \""+req+"\"")
+		//Display the request, but remove the trailing \r\n
+		log.Println(prefix, "invalid request: \""+req[:len(req)-2]+"\"")
 		conn.Close()
 	}
 }
