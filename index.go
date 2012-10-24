@@ -86,7 +86,9 @@ func newPage(target string, path string) *page {
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
-		accessURI, err = url.ParseRequestURI("http://" + target + path)
+		//Prepend http:// permanently
+		target = "http://" + target
+		accessURI, err = url.ParseRequestURI(target + path)
 		if err != nil {
 			return &page{}
 		}
@@ -125,10 +127,20 @@ func newPage(target string, path string) *page {
 
 		if !strings.Contains(link, "http://") && !strings.Contains(link, "https://") {
 			//If the string doesn't contain http://,
-			//put it in the internal section
+			//put it in the internal section.
 			internalLinks = append(internalLinks, link)
 		} else {
-			//otherwise, put it in externals
+			//If the string directs to this site (with http://)
+			//then put it in internal links
+			println(target, link)
+			if strings.HasPrefix(link, target) {
+				//(but trim the website name
+				println("Self link.")
+				internalLinks = append(internalLinks, link[len(target):])
+				//and jump back to the beginning of the for,)
+				continue
+			}
+			//otherwise, put it in externals.
 			externalLinks = append(externalLinks, link)
 		}
 	}
