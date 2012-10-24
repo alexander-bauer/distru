@@ -33,7 +33,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, s)
 	
 	//add the jquery
-	s = "<script type='text/javscript'>"
+	s = "<script type='text/javascript'>"
 	fmt.Fprint(w, s)
 	file, err = ioutil.ReadFile("webui/jquery.js")
 		if err != nil { panic(err) }
@@ -43,7 +43,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, s)
 	
 	//add the javascript file
-	s = "<script type='text/javscript'>"
+	s = "<script type='text/javascript'>"
 	fmt.Fprint(w, s)
 	file, err = ioutil.ReadFile("webui/common.js")
 		if err != nil { panic(err) }
