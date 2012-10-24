@@ -4,6 +4,11 @@ import (
 	"encoding/gob"
 	"encoding/json"
 	"io"
+	"io/ioutil"
+	"net/http"
+	"net/url"
+	"regexp"
+	"strings"
 )
 
 type Index struct {
@@ -27,19 +32,6 @@ func (index *Index) JSON() string {
 	return string(b)
 }
 
-type site struct {
-	URL   string //domain or IP that identifies this Block
-	Pages []page //nonordered list of pages and their data on the server
-	Tree  []string
-}
-
-type page struct {
-	Path      string   //path to page on the webserver (relative to root page)
-	Links     []string //list of hyperlinks on the page
-	Internals []string //list of internal links on the page
-	Content   string   //the content, temporarily replacing word lists
-}
-
 //NewIndex is a constructor for the Index struct
 func NewIndex() *Index {
 
@@ -58,36 +50,107 @@ func NewIndex() *Index {
 	return &index
 }
 
-func newSite(url string) *site {
-	pages := []page{*newPage(url, "/")} //make an array of length 1
+type site struct {
+	URL   string //domain or IP that identifies this Block
+	Pages []page //nonordered list of pages and their data on the server
+	Tree  []string
+}
+
+func newSite(target string) *site {
+	pages := []page{*newPage(target, "/")} //make an array of length 1
 	//by scraping the site's page
 	//TODO this should build the whole tree
 
 	site := site{
-		URL:   url,
+		URL:   target,
 		Pages: pages,
 		Tree:  pages[0].Internals, //just grabbing /'s internal links
 	}
 	return &site
 }
 
-//newPage is the site constructor, which scrapes a single webpage
-//it takes the URL of a site (without trailing /,) and a directory path, such
-//as / or /help.txt
-//It returns the sitePage object, as well as an array of internal links.
-func newPage(url string, path string) *page {
-	body := fetch(url)                                //get the body of the webpage
-	allLinks := getLinks(body)                        //collect links, but
-	externalLinks := getExternalLinks(allLinks)       //get only the external links
-	internalLinks := getInternalLinks(allLinks, body) //get only internal links
+type page struct {
+	Path      string   //path to page on the webserver (relative to root page)
+	Internals []string //list of internal links on the page
+	Externals []string //list of external links on the page
+}
+
+//newPage is the page constructor. It takes a target URL, (that being the base
+//of the website, without trailing /,) and path to the target webpage. It
+//fetches the webpage by combining the target and path, then scrapes the links
+//from the body of the html. It determines whether each link is an internal or
+//external link, and puts them in different arrays, then returns a page
+//containing the resulting information. It returns an empty page if it
+//encounters an error.
+func newPage(target string, path string) *page {
+	//Parse the target URI, return empty if it fails.
+	accessURI, err := url.ParseRequestURI(target + path)
+	if err != nil {
+		//Prepend http:// permanently
+		target = "http://" + target
+		accessURI, err = url.ParseRequestURI(target + path)
+		if err != nil {
+			return &page{}
+		}
+	}
+
+	//Get the content of the webpage via HTTP, return blank if it fails.
+	resp, err := http.Get(accessURI.String())
+	if err != nil {
+		return &page{}
+	}
+	defer resp.Body.Close()
+	//Get the body of the request as a []byte.
+	b, err := ioutil.ReadAll(resp.Body)
+	//Convert to string real quick.
+	body := string(b)
+
+	//Now we're going to move on to parsing the links.
+	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
+	if err != nil {
+		return &page{}
+	}
+
+	//Use pattern matching to find all link tags on the page,
+	//and put them in array.
+	tags := pattern.FindAllStringSubmatch(body, -1)
+
+	//Now parse them into a list of actual links.
+	//We're going to separate the internal and external
+	//links in the same step.
+	internalLinks := make([]string, 0, len(tags)) //length 0, reserve space
+	externalLinks := make([]string, 0, len(tags)) //for len(tags) items
+
+	for i := range tags {
+		//tags is an array containing both the "href=" and the link
+		link := tags[i][1] //so we take only the link element
+
+		if !strings.Contains(link, "http://") && !strings.Contains(link, "https://") {
+			//If the string doesn't contain http://,
+			//put it in the internal section.
+			internalLinks = append(internalLinks, link)
+		} else {
+			//If the string directs to this site (with http://)
+			//then put it in internal links
+			println(target, link)
+			if strings.HasPrefix(link, target) {
+				//(but trim the website name
+				println("Self link.")
+				internalLinks = append(internalLinks, link[len(target):])
+				//and jump back to the beginning of the for,)
+				continue
+			}
+			//otherwise, put it in externals.
+			externalLinks = append(externalLinks, link)
+		}
+	}
 
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
 
 	return &page{
 		Path:      path,
-		Links:     externalLinks,
 		Internals: internalLinks,
-		Content:   body,
+		Externals: externalLinks,
 	}
 }
