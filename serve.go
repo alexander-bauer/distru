@@ -29,8 +29,8 @@ func Serve() {
 //handleConn is the internal server function for distru. When it recieves a connection, it logs the RemoteAddr of the connection, then serves a gob of the in-memory index (Idx) to it. It closes the connection immediately afterward.
 func handleConn(conn net.Conn) {
 	//Save the connection detail for simplicity of logging.
-	client := conn.RemoteAddr().String()
-	log.Println("Connection from " + client)
+	prefix := conn.RemoteAddr().String() + ">"
+	log.Println("Connection from " + conn.RemoteAddr().String())
 
 	//Going to check the request here, so create a new reader and writer
 	r := bufio.NewReader(conn)
@@ -38,7 +38,7 @@ func handleConn(conn net.Conn) {
 	//and then read until we get a '.'
 	b, err := r.ReadBytes('.')
 	if err != nil {
-		log.Println("Connection error from " + client + ": " + err.Error())
+		log.Println(prefix, err)
 		conn.Close()
 	}
 	//Convert the []byte recieved to a string, for convenience
@@ -48,12 +48,12 @@ func handleConn(conn net.Conn) {
 		//Then serve a gob to the new connection immediately.
 		Idx.Gob(w)
 		conn.Close()
-		log.Println("Served gob to " + client)
+		log.Println(prefix, "Served gob.")
 	} else if req == "distru json." {
 		//Then serve a json encoded index.
 		_, err := w.WriteString(Idx.JSON())
 		if err != nil {
-			log.Println("Error serving json to "+client+": ", err)
+			log.Println(prefix, "Error serving json:", err)
 			conn.Close()
 			return
 		}
@@ -61,14 +61,14 @@ func handleConn(conn net.Conn) {
 		//and flush it to the connection.
 		err = w.Flush()
 		if err != nil {
-			log.Println("Error serving json to "+client+": ", err)
+			log.Println(prefix, "Error serving json:", err)
 			conn.Close()
 			return
 		}
 		conn.Close()
-		log.Println("Served json to " + client)
+		log.Println(prefix, "Served json.")
 	} else {
-		log.Println("Invalid request from " + client + ": \"" + req + "\"")
+		log.Println(prefix, "Invalid request: \""+req+"\"")
 		conn.Close()
 	}
 }
