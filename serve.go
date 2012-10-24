@@ -18,7 +18,7 @@ const (
 func Serve() {
 	ln, err := net.Listen("tcp", ":9049")
 	if err != nil {
-		log.Fatal("Could not start server: ", err)
+		log.Fatal("Could not start server:", err)
 	}
 	log.Println("Started server.")
 
