@@ -29,8 +29,8 @@ func Serve() {
 //handleConn is the internal server function for distru. When it recieves a connection, it logs the RemoteAddr of the connection, then serves a gob of the in-memory index (Idx) to it. It closes the connection immediately afterward.
 func handleConn(conn net.Conn) {
 	//Save the connection detail for simplicity of logging.
-	prefix := conn.RemoteAddr().String() + ">"
-	log.Println("Connection from " + conn.RemoteAddr().String())
+	prefix := "<-" + conn.RemoteAddr().String() + ">"
+	log.Println(prefix, "new connection")
 
 	//Going to check the request here, so create a new reader and writer
 	r := bufio.NewReader(conn)
@@ -48,12 +48,12 @@ func handleConn(conn net.Conn) {
 		//Then serve a gob to the new connection immediately.
 		Idx.Gob(w)
 		conn.Close()
-		log.Println(prefix, "Served gob.")
+		log.Println(prefix, "served gob")
 	} else if req == "distru json." {
 		//Then serve a json encoded index.
 		_, err := w.WriteString(Idx.JSON())
 		if err != nil {
-			log.Println(prefix, "Error serving json:", err)
+			log.Println(prefix, "error serving json:", err)
 			conn.Close()
 			return
 		}
@@ -61,14 +61,14 @@ func handleConn(conn net.Conn) {
 		//and flush it to the connection.
 		err = w.Flush()
 		if err != nil {
-			log.Println(prefix, "Error serving json:", err)
+			log.Println(prefix, "error serving json:", err)
 			conn.Close()
 			return
 		}
 		conn.Close()
-		log.Println(prefix, "Served json.")
+		log.Println(prefix, "served json")
 	} else {
-		log.Println(prefix, "Invalid request: \""+req+"\"")
+		log.Println(prefix, "invalid request: \""+req+"\"")
 		conn.Close()
 	}
 }
@@ -76,28 +76,29 @@ func handleConn(conn net.Conn) {
 //RecvIndex tries to recieve an index gob from a distru server (on tcp port 9049) running on the given url. It returns an empty index if it fails to do so.
 func RecvIndex(url string) *Index {
 	//Create the connection, from which the target server should immediately try to serve an index.
-	log.Println("Connecting to " + url)
 	conn, err := net.Dial("tcp", url+":9049")
 	if err != nil {
-		log.Println("No response from: " + url + "...")
+		log.Println("No response from: " + url)
 		return &Index{}
 	}
+
+	prefix := "->" + conn.RemoteAddr().String() + ">"
 
 	//When we're ready, create a reader, so we can retrieve the data from the connection, and a writer, so we can request it.
 	r := bufio.NewReader(conn)
 	w := bufio.NewWriter(conn)
 
 	//Request a gob from the target server
-	log.Println("Requesting gob from " + url)
+	log.Println(prefix, "requesting gob")
 	_, err = w.WriteString("distru gob.")
 	if err != nil {
-		log.Println("Connection problem from "+url+": ", err)
+		log.Println(prefix, "connection problem:", err)
 		conn.Close()
 		return &Index{}
 	}
 	err = w.Flush()
 	if err != nil {
-		log.Println("Connection problem from "+url+": ", err)
+		log.Println(prefix, "connection problem:", err)
 		conn.Close()
 		return &Index{}
 	}
