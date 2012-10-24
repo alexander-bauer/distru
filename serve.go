@@ -75,8 +75,8 @@ func handleConn(conn net.Conn) {
 		conn.Close()
 		log.Println(prefix, "served json")
 	} else {
-		//Display the request, but remove the trailing \r\n
-		log.Println(prefix, "invalid request: \""+req[:len(req)-2]+"\"")
+		//Display the request
+		log.Println(prefix, "invalid request: \""+req+"\"")
 		conn.Close()
 	}
 }
