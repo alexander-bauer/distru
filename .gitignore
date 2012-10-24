@@ -1,5 +1,6 @@
-# Output Binary
+# Project specific files
 distru
+log
 
 # Compiled Object files, Static and Dynamic libs (Shared Objects)
 *.o
