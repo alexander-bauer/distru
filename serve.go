@@ -7,6 +7,11 @@ import (
 	"net"
 )
 
+const (
+	GETGOB  = "distru gob."  //Requests a gob of the current index.
+	GETJSON = "distru json." //Requests a json-encoded current index.
+)
+
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
 
 //Serve is the primary function of distru. It listens on the tcp port 9049 for incoming connections, then passes them directly to handleConn.
@@ -44,12 +49,12 @@ func handleConn(conn net.Conn) {
 	//Convert the []byte recieved to a string, for convenience
 	req := string(b)
 
-	if req == "distru gob." {
+	if req == GETGOB {
 		//Then serve a gob to the new connection immediately.
 		Idx.Gob(w)
 		conn.Close()
 		log.Println(prefix, "served gob")
-	} else if req == "distru json." {
+	} else if req == GETJSON {
 		//Then serve a json encoded index.
 		_, err := w.WriteString(Idx.JSON())
 		if err != nil {
@@ -90,7 +95,7 @@ func RecvIndex(url string) *Index {
 
 	//Request a gob from the target server
 	log.Println(prefix, "requesting gob")
-	_, err = w.WriteString("distru gob.")
+	_, err = w.WriteString(GETGOB)
 	if err != nil {
 		log.Println(prefix, "connection problem:", err)
 		conn.Close()
