@@ -49,5 +49,10 @@ body {
 }
 
 .hidden {
-	display: none;
+	width: 1px;
+	height: 1px;
+	color: transparent;
+	background: transparent;
+	border: 0px;
+	padding: 0px;
 }
