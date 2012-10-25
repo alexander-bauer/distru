@@ -15,7 +15,7 @@ func ServeWeb() {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-	
+	fmt.Fprint(w, r)
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
@@ -31,14 +31,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil { panic(err) }
 	fmt.Fprint(w, string(file))
 	fmt.Fprint(w, "</style>")
-	
-	//add the jquery
-	fmt.Fprint(w, "<script type=\"text/javascript\">")
-	file, err = ioutil.ReadFile("webui/jquery.js")
-		if err != nil { panic(err) }
-	fmt.Fprint(w, string(file))
-	fmt.Fprint(w, "</script>")
-	
+
 	//add the javascript file
 	fmt.Fprint(w, "<script type=\"text/javascript\">")
 	file, err = ioutil.ReadFile("webui/common.js")
@@ -56,9 +49,9 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<div class = \"name\">Distru</div>")
 	
 	//add the form
-	fmt.Fprint(w, "<form action=\"/search/%s\" method=\"post\" name=\"search\">")
-	fmt.Fprint(w, "<input type=\"text\" class=\"search\" name=\"search\" placeholder=\"Search freely\"/>")
-	fmt.Fprint(w, "<input type=\"submit\" value=\"Submit\" name=\"search\" class=\"hidden\"/>")
+	fmt.Fprint(w, "<form action=\"/search/\" method=\"post\" name=\"search\">")
+	fmt.Fprint(w, "<input type=\"text\" id=\"search\" class=\"search\" name=\"search\" placeholder=\"Search freely\"/>")
+	fmt.Fprint(w, "<input type=\"submit\" value=\"Submit\" name=\"search\" class=\"hidden\" onclick=\"searchThis()\"/>")
 	fmt.Fprint(w, "</form>")
 	
 	//close the <body> element
