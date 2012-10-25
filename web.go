@@ -15,7 +15,9 @@ func ServeWeb() {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, r)
+	searchTerm := r.URL.Path[len("/search/"):]
+	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"") 
+	fmt.Fprint(w, searchTerm)
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
