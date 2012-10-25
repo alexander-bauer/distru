@@ -132,10 +132,8 @@ func newPage(target string, path string) *page {
 		} else {
 			//If the string directs to this site (with http://)
 			//then put it in internal links
-			println(target, link)
 			if strings.HasPrefix(link, target) {
 				//(but trim the website name
-				println("Self link.")
 				internalLinks = append(internalLinks, link[len(target):])
 				//and jump back to the beginning of the for,)
 				continue
