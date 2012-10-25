@@ -26,21 +26,21 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<head>")
 	
 	//add the stylesheet
-	fmt.Fprint(w, "<style type='text/css'>")
+	fmt.Fprint(w, "<style type=\"text/css\">")
 	file, err := ioutil.ReadFile("webui/style.css")
 		if err != nil { panic(err) }
 	fmt.Fprint(w, string(file))
 	fmt.Fprint(w, "</style>")
 	
 	//add the jquery
-	fmt.Fprint(w, "<script type='text/javascript'>")
+	fmt.Fprint(w, "<script type=\"text/javascript\">")
 	file, err = ioutil.ReadFile("webui/jquery.js")
 		if err != nil { panic(err) }
 	fmt.Fprint(w, string(file))
 	fmt.Fprint(w, "</script>")
 	
 	//add the javascript file
-	fmt.Fprint(w, "<script type='text/javascript'>")
+	fmt.Fprint(w, "<script type=\"text/javascript\">")
 	file, err = ioutil.ReadFile("webui/common.js")
 		if err != nil { panic(err) }
 	fmt.Fprint(w, string(file))
@@ -49,10 +49,20 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	//close the <head> element
 	fmt.Fprint(w, "</head>")
 	
-	//add the body of index.html
-	file, err = ioutil.ReadFile("webui/index.html")
-		if err != nil { panic(err) }
-	fmt.Fprint(w, string(file))
+	//add the <body> element
+	fmt.Fprint(w, "<body>")
+	
+	//add the name that hovers above the search bar
+	fmt.Fprint(w, "<div class = \"name\">Distru</div>")
+	
+	//add the form
+	fmt.Fprint(w, "<form action=\"/search/%s\" method=\"post\" name=\"search\">")
+	fmt.Fprint(w, "<input type=\"text\" class=\"search\" name=\"search\" placeholder=\"Search freely\"/>")
+	fmt.Fprint(w, "<input type=\"submit\" value=\"Submit\" name=\"search\" class=\"hidden\"/>")
+	fmt.Fprint(w, "</form>")
+	
+	//close the <body> element
+	fmt.Fprint(w, "</body>")
 
 	//close the <html> element
 	fmt.Fprint(w, "</html>")
