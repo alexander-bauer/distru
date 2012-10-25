@@ -20,55 +20,41 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	//add the <html> element
-	s := "<html>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "<html>")
 	
 	//add the <head> element
-	s = "<head>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "<head>")
 	
 	//add the stylesheet
-	s = "<style type='text/css'>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "<style type='text/css'>")
 	file, err := ioutil.ReadFile("webui/style.css")
 		if err != nil { panic(err) }
-	s = string(file)
-	fmt.Fprint(w, s)
-	s = "</style>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, string(file))
+	fmt.Fprint(w, "</style>")
 	
 	//add the jquery
-	s = "<script type='text/javascript'>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "<script type='text/javascript'>")
 	file, err = ioutil.ReadFile("webui/jquery.js")
 		if err != nil { panic(err) }
-	s = string(file)
-	fmt.Fprint(w, s)
-	s = "</script>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, string(file))
+	fmt.Fprint(w, "</script>")
 	
 	//add the javascript file
-	s = "<script type='text/javascript'>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "<script type='text/javascript'>")
 	file, err = ioutil.ReadFile("webui/common.js")
 		if err != nil { panic(err) }
-	s = string(file)
-	fmt.Fprint(w, s)
-	s = "</script>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, string(file))
+	fmt.Fprint(w, "</script>")
 		
 	//close the <head> element
-	s = "</head>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "</head>")
 	
 	//add the body of index.html
 	file, err = ioutil.ReadFile("webui/index.html")
 		if err != nil { panic(err) }
-	s = string(file)
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, string(file))
 
 	//close the <html> element
-	s = "</html>"
-	fmt.Fprint(w, s)
+	fmt.Fprint(w, "</html>")
 	
 }
