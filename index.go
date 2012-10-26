@@ -38,7 +38,7 @@ func NewIndex() *Index {
 
 	//get peer list here TODO
 
-	peerList := []string{"localhost", "uppit.us", "example.com"}
+	peerList := []string{"example.com"}
 	peerSites := make([]site, len(peerList))
 
 	for i := range peerList {
@@ -53,20 +53,45 @@ func NewIndex() *Index {
 
 type site struct {
 	URL   string //domain or IP that identifies this Block
-	Pages []page //nonordered list of pages and their data on the server
-	Tree  map[string]bool
+	Pages map[string]*page //nonordered map of pages on the server
 }
 
 func newSite(target string) site {
-
-	root, tree := getPage(target, "/") //make an array of length 1
-	//by scraping the site's page
-	//TODO this should build the whole tree
+	//Initialize an empty tree and set isFinished to false.
+	tree := []string{}
+	isFinished := false
+	
+	pages := make(map[string]*page)
+	pages["/"], tree = getPage(target, "/")
+	//Grab the root page first, then we're going to build on the tree.
+	//We'll loop until there are no more unresolved pages. Then we'll
+	//set isFinished to true, and break the loop.
+	for isFinished == false {
+		//We set isFinished to true here. If we're not actually
+		//finished, the following loop will set it to false.
+		isFinished = true
+		for i := range tree {
+			if pages[tree[i]] != nil {
+				//If the page has been indexed already,
+				//ignore it.
+				continue
+			}
+			//Otherwise, set isFinished to false, because we will
+			//need at least one more iteration.
+			isFinished = false
+			//Then we index the page and grab the new tree.
+			newTree := []string{}
+			pages[tree[i]], newTree = getPage(target, tree[i])
+			
+			//Then we append the new tree to the old one,
+			tree = append(tree, newTree...)
+			//and start the loop over again.
+		}
+	}
 
 	site := site{
 		URL:   target,
-		Pages: []page{root},
-		Tree:  tree,
+		Pages: pages,
 	}
 	return site
 }
@@ -76,8 +101,8 @@ type page struct {
 	Links []string //list of external links on the page
 }
 
-//getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The external links are put into the Links element of the page structure. The internal links are resolved to be absolute (internal) links on the webserver, and then returned (without duplicates) as a map[string]bool, in which every element is true.
-func getPage(target string, path string) (page, map[string]bool) {
+//getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The external links are put into the Links element of the page structure. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, possibly with duplicates, as a []string, in which every element is true.
+func getPage(target string, path string) (*page, []string) {
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
@@ -85,14 +110,14 @@ func getPage(target string, path string) (page, map[string]bool) {
 		target = "http://" + target
 		accessURI, err = url.ParseRequestURI(target + path)
 		if err != nil {
-			return page{}, nil
+			return &page{}, nil
 		}
 	}
 
 	//Get the content of the webpage via HTTP, return blank if it fails.
 	resp, err := http.Get(accessURI.String())
 	if err != nil {
-		return page{}, nil
+		return &page{}, nil
 	}
 	defer resp.Body.Close()
 	//Get the body of the request as a []byte.
@@ -103,7 +128,7 @@ func getPage(target string, path string) (page, map[string]bool) {
 	//Now we're going to move on to parsing the links.
 	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
 	if err != nil {
-		return page{}, nil
+		return &page{}, nil
 	}
 
 	//Use pattern matching to find all link tags on the page,
@@ -113,8 +138,8 @@ func getPage(target string, path string) (page, map[string]bool) {
 	//Now parse them into a list of actual links.
 	//We're going to separate the internal and external
 	//links in the same step.
-	internalLinks := make(map[string]bool, len(tags)) //length 0, reserve space
-	externalLinks := make([]string, 0, len(tags))     //for len(tags) items
+	internalLinks := make([]string, 0, len(tags)) //length 0, reserve space
+	externalLinks := make([]string, 0, len(tags)) //for len(tags) items
 
 	for i := range tags {
 		//tags is an array containing both the "href=" and the link
@@ -123,13 +148,13 @@ func getPage(target string, path string) (page, map[string]bool) {
 		if !strings.Contains(link, "http://") && !strings.Contains(link, "https://") {
 			//If the string doesn't contain http://,
 			//resolve it to an absolute 
-			internalLinks[join(path, link)] = true
+			internalLinks = append(internalLinks, join(path, link))
 		} else {
 			//If the string directs to this site (with http://)
 			//then put it in internal links
 			if strings.HasPrefix(link, target) {
 				//(but trim the website name
-				internalLinks[join(path, link[len(target):])] = true
+				internalLinks = append(internalLinks, join(path, link[len(target):]))
 				//and jump back to the beginning of the for,)
 				continue
 			}
@@ -141,7 +166,7 @@ func getPage(target string, path string) (page, map[string]bool) {
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
 
-	return page{
+	return &page{
 		Path:  path,
 		Links: externalLinks,
 	}, internalLinks
