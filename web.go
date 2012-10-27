@@ -12,6 +12,7 @@ func ServeWeb() {
 	http.HandleFunc("/", frontpageHandler)
 	log.Println("Starting webserver.")
 	http.ListenAndServe(":9048", nil)
+	
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,6 +22,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
+	
 	//add the <html> element
 	fmt.Fprint(w, "<html>")
 	
@@ -51,11 +53,11 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<div class = \"name\">Distru</div>")
 	
 	//add the form
-	fmt.Fprint(w, "<form action=\"/search/\" method=\"post\" name=\"search\">")
+	//fmt.Fprint(w, "<form>")
 	fmt.Fprint(w, "<input type=\"text\" id=\"search\" class=\"search\" name=\"search\" placeholder=\"Search freely\"/>")
-	fmt.Fprint(w, "<input type=\"submit\" value=\"Submit\" name=\"search\" class=\"hidden\" onclick=\"searchThis()\"/>")
-	fmt.Fprint(w, "</form>")
-	
+	fmt.Fprint(w, "<input type=\"submit\" value=\"Submit\" name=\"search\" class=\"hiden\" onclick=\"searchThis()\"/>")
+	//fmt.Fprint(w, "</form>")
+		
 	//close the <body> element
 	fmt.Fprint(w, "</body>")
 

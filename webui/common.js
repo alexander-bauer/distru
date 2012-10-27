@@ -1,3 +1,3 @@
 function searchThis() {
-	alert(document.getElementById('search').value);
+	window.location = '/search/'+document.getElementById('search').value;
 }
