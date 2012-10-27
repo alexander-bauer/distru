@@ -31,6 +31,7 @@ If you don't already have Homebrew installed, view [this](http://mxcl.github.com
 ```bash
 brew install go
 ```
+If you don't want to install Homebrew, you can visit [Go's website](http://golang.org/) to download and install it.
 
 ###Get Files
 
