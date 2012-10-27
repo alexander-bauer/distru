@@ -1,3 +1,4 @@
 function searchThis() {
-	window.location = '/search/'+document.getElementById('search').value;
+	if (event.keyCode == 13)
+		window.location = '/search/'+document.getElementById('search').value;
 }

@@ -53,11 +53,8 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<div class = \"name\">Distru</div>")
 	
 	//add the form
-	//fmt.Fprint(w, "<form>")
-	fmt.Fprint(w, "<input type=\"text\" id=\"search\" class=\"search\" name=\"search\" placeholder=\"Search freely\"/>")
-	fmt.Fprint(w, "<input type=\"submit\" value=\"Submit\" name=\"search\" class=\"hiden\" onclick=\"searchThis()\"/>")
-	//fmt.Fprint(w, "</form>")
-		
+	fmt.Fprint(w, "<input type=\"text\" onkeydown=\"searchThis()\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/>")
+	
 	//close the <body> element
 	fmt.Fprint(w, "</body>")
 
