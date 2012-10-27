@@ -52,7 +52,7 @@ func NewIndex() *Index {
 }
 
 type site struct {
-	URL   string //domain or IP that identifies this Block
+	URL   string           //domain or IP that identifies this Block
 	Pages map[string]*page //nonordered map of pages on the server
 }
 
@@ -60,7 +60,7 @@ func newSite(target string) site {
 	//Initialize an empty tree and set isFinished to false.
 	tree := []string{}
 	isFinished := false
-	
+
 	pages := make(map[string]*page)
 	pages["/"], tree = getPage(target, "/")
 	//Grab the root page first, then we're going to build on the tree.
@@ -82,7 +82,7 @@ func newSite(target string) site {
 			//Then we index the page and grab the new tree.
 			newTree := []string{}
 			pages[tree[i]], newTree = getPage(target, tree[i])
-			
+
 			//Then we append the new tree to the old one,
 			tree = append(tree, newTree...)
 			//and start the loop over again.

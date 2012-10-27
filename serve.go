@@ -20,7 +20,14 @@ func Serve() {
 	if err != nil {
 		log.Fatal("Could not start server:", err)
 	}
-	log.Println("Started server.")
+	log.Println("Started server on port 9049.")
+
+	//Start a new goroutine to begin the indexing. This allows the server
+	//perform other functions while the index is being built.
+	go func() {
+		Idx = NewIndex()
+		log.Println("Finished indexing.")
+	}()
 
 	for {
 		conn, err := ln.Accept()

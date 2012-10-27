@@ -2,7 +2,7 @@ package main
 
 import "os"
 
-var Idx = NewIndex()
+var Idx = &Index{}
 
 func main() {
 	Serve()
