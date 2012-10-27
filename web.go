@@ -31,7 +31,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
-	file, err := ioutil.ReadFile("webui/style.css")
+	file, err := ioutil.ReadFile("style.css")
 		if err != nil { panic(err) }
 	fmt.Fprint(w, string(file))
 	fmt.Fprint(w, "</style>")
