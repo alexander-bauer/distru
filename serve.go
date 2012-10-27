@@ -25,12 +25,11 @@ func Serve() {
 	//Start a new goroutine for the webserver.
 	go ServeWeb()
 
-	//Start a new goroutine to begin the indexing. This allows the server
-	//perform other functions while the index is being built.
-	go func() {
-		Idx = NewIndex()
-		log.Println("Finished indexing.")
-	}()
+	//Start the Index Maintainer, and recieve the input channel for it.
+	queue := MaintainIndex(Idx, 1)
+
+	//Put a new domain into the queue.
+	queue <- "example.com"
 
 	for {
 		conn, err := ln.Accept()

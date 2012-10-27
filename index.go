@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"path"
@@ -13,7 +14,7 @@ import (
 )
 
 type Index struct {
-	Sites []site //list of indexed webpages
+	Sites map[string]site //A map of fully indexed webpages.
 }
 
 //Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
@@ -33,22 +34,26 @@ func (index *Index) JSON() string {
 	return string(b)
 }
 
-//NewIndex is a constructor for the Index struct
-func NewIndex() *Index {
+//MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It returns a chan into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
+//To remove a site from the index, use delete(index.Sites, urlstring).
+func MaintainIndex(index *Index, numIndexers int) chan<- string {
+	//First, we're going to make the channel of pending sites.
+	pending := make(chan string)
 
-	//get peer list here TODO
-
-	peerList := []string{"example.com"}
-	peerSites := make([]site, len(peerList))
-
-	for i := range peerList {
-		peerSites[i] = newSite(peerList[i])
+	//Next, we're going to launch numIndexers amount of Indexers.
+	for i := 0; i < numIndexers; i++ {
+		go Indexer(index, pending)
 	}
 
-	index := Index{
-		Sites: peerSites,
+	return pending
+}
+
+func Indexer(index *Index, pending <-chan string) {
+	for target := range pending {
+		//Update the target site.
+		index.Sites[target] = newSite(target)
+		log.Println("indexer> added \"" + target + "\"")
 	}
-	return &index
 }
 
 type site struct {
