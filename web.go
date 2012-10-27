@@ -38,9 +38,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 
 	//add the javascript file
 	fmt.Fprint(w, "<script type=\"text/javascript\">")
-	file, err = ioutil.ReadFile("webui/common.js")
-		if err != nil { panic(err) }
-	fmt.Fprint(w, string(file))
+	fmt.Fprint(w, "function searchThis() {if (event.keyCode == 13) window.location = '/search/'+document.getElementById('search').value;}")
 	fmt.Fprint(w, "</script>")
 		
 	//close the <head> element
