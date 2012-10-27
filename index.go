@@ -15,6 +15,7 @@ import (
 
 type Index struct {
 	Sites map[string]site //A map of fully indexed webpages.
+	Queue chan string     `json:"-"` //The channel which controls Indexers
 }
 
 //Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
@@ -34,18 +35,16 @@ func (index *Index) JSON() string {
 	return string(b)
 }
 
-//MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It returns a chan into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
-//To remove a site from the index, use delete(index.Sites, urlstring).
-func MaintainIndex(index *Index, numIndexers int) chan<- string {
+//MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It sets index.Queue to a channel into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
+//To remove a site from the index, use delete(index.Sites, urlstring). To shut down the indexers, close() index.Queue.
+func MaintainIndex(index *Index, numIndexers int) {
 	//First, we're going to make the channel of pending sites.
-	pending := make(chan string)
+	index.Queue = make(chan string)
 
 	//Next, we're going to launch numIndexers amount of Indexers.
 	for i := 0; i < numIndexers; i++ {
-		go Indexer(index, pending)
+		go Indexer(index, index.Queue)
 	}
-
-	return pending
 }
 
 func Indexer(index *Index, pending <-chan string) {

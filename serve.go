@@ -27,10 +27,10 @@ func Serve() {
 	go ServeWeb()
 
 	//Start the Index Maintainer, and recieve the input channel for it.
-	Queue = MaintainIndex(Idx, 1)
+	MaintainIndex(Idx, 1)
 
 	//Put a new domain into the queue.
-	Queue <- "example.com"
+	Idx.Queue <- "example.com"
 
 	for {
 		conn, err := ln.Accept()
@@ -87,7 +87,7 @@ func handleConn(conn net.Conn) {
 			log.Println(prefix, err)
 			conn.Close()
 		}
-		Queue <- string(site[:len(site)-2])
+		Idx.Queue <- string(site[:len(site)-2])
 		conn.Close()
 	} else {
 		//Display the request
