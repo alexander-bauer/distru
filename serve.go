@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	GETGOB  = "distru gob\r\n"  //Requests a gob of the current index.
-	GETJSON = "distru json\r\n" //Requests a json-encoded current index.
+	GETGOB  = "distru gob\r\n"   //Requests a gob of the current index.
+	GETJSON = "distru json\r\n"  //Requests a json-encoded current index.
+	NEWSITE = "distru index\r\n" //Prefaces a request to index a new site.
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
@@ -26,10 +27,10 @@ func Serve() {
 	go ServeWeb()
 
 	//Start the Index Maintainer, and recieve the input channel for it.
-	queue := MaintainIndex(Idx, 1)
+	Queue = MaintainIndex(Idx, 1)
 
 	//Put a new domain into the queue.
-	queue <- "example.com"
+	Queue <- "example.com"
 
 	for {
 		conn, err := ln.Accept()
@@ -80,6 +81,14 @@ func handleConn(conn net.Conn) {
 		}
 		conn.Close()
 		log.Println(prefix, "served json")
+	} else if req == NEWSITE { //This should be a temporary functionality.
+		site, err := r.ReadBytes('\n')
+		if err != nil {
+			log.Println(prefix, err)
+			conn.Close()
+		}
+		Queue <- string(site[:len(site)-2])
+		conn.Close()
 	} else {
 		//Display the request
 		log.Println(prefix, "invalid request: \""+req+"\"")
