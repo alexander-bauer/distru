@@ -57,43 +57,50 @@ func handleConn(conn net.Conn) {
 		conn.Close()
 	}
 	req := string(b)
-
-	if req == GETGOB {
-		//Then serve a gob to the new connection immediately.
-		Idx.Gob(w)
-		conn.Close()
-		log.Println(prefix, "served gob")
-	} else if req == GETJSON {
-		//Then serve a json encoded index.
-		_, err := w.WriteString(Idx.JSON())
-		if err != nil {
-			log.Println(prefix, "error serving json:", err)
+	
+	switch {
+		case req == GETGOB: {
+			Idx.Gob(w)
 			conn.Close()
-			return
-		}
-
-		//and flush it to the connection.
-		err = w.Flush()
-		if err != nil {
-			log.Println(prefix, "error serving json:", err)
+			log.Println(prefix, "served gob")
+		} //close case
+		
+		case req == GETJSON: {
+			//Then serve a json encoded index.
+			_, err := w.WriteString(Idx.JSON())
+			if err != nil {
+				log.Println(prefix, "error serving json:", err)
+				conn.Close()
+				return	
+			} //close if
+			//and flush it to the connection.
+			err = w.Flush()
+			if err != nil {
+				log.Println(prefix, "error serving json:", err)
+				conn.Close()
+				return
+			} //close if
 			conn.Close()
-			return
-		}
-		conn.Close()
-		log.Println(prefix, "served json")
-	} else if req == NEWSITE { //This should be a temporary functionality.
-		site, err := r.ReadBytes('\n')
-		if err != nil {
-			log.Println(prefix, err)
+			log.Println(prefix, "served json")
+		} //close case
+		
+		case req == NEWSITE: {
+			site, err := r.ReadBytes('\n')
+			if err != nil {
+				log.Println(prefix, err)
+				conn.Close()
+			}
+			Idx.Queue <- string(site[:len(site)-2])
 			conn.Close()
-		}
-		Idx.Queue <- string(site[:len(site)-2])
-		conn.Close()
-	} else {
-		//Display the request
-		log.Println(prefix, "invalid request: \""+req+"\"")
-		conn.Close()
-	}
+		} //close case
+		
+		default: {
+			//Display the request
+			log.Println(prefix, "invalid request: \""+req+"\"")
+			conn.Close()
+		} //close default case
+	} //close switch
+	
 }
 
 //RecvIndex tries to recieve an index gob from a distru server (on tcp port 9049) running on the given url. It returns an empty index if it fails to do so.
