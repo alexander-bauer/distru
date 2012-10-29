@@ -57,21 +57,23 @@ func handleConn(conn net.Conn) {
 		conn.Close()
 	}
 	req := string(b)
-	
+
 	switch req {
-		case GETGOB: {
+	case GETGOB:
+		{
 			Idx.Gob(w)
 			conn.Close()
 			log.Println(prefix, "served gob")
 		} //close case
-		
-		case GETJSON: {
+
+	case GETJSON:
+		{
 			//Then serve a json encoded index.
 			_, err := w.WriteString(Idx.JSON())
 			if err != nil {
 				log.Println(prefix, "error serving json:", err)
 				conn.Close()
-				return	
+				return
 			} //close if
 			//and flush it to the connection.
 			err = w.Flush()
@@ -83,8 +85,9 @@ func handleConn(conn net.Conn) {
 			conn.Close()
 			log.Println(prefix, "served json")
 		} //close case
-		
-		case NEWSITE: {
+
+	case NEWSITE:
+		{
 			site, err := r.ReadBytes('\n')
 			if err != nil {
 				log.Println(prefix, err)
@@ -93,14 +96,15 @@ func handleConn(conn net.Conn) {
 			Idx.Queue <- string(site[:len(site)-2])
 			conn.Close()
 		} //close case
-		
-		default: {
+
+	default:
+		{
 			//Display the request
 			log.Println(prefix, "invalid request: \""+req+"\"")
 			conn.Close()
 		} //close default case
 	} //close switch
-	
+
 }
 
 //RecvIndex tries to recieve an index gob from a distru server (on tcp port 9049) running on the given url. It returns an empty index if it fails to do so.
