@@ -18,17 +18,16 @@ func ServeWeb() {
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//get the search term and save it as searchTerm
 	searchTerm := r.URL.Path[len("/search/"):]
+	//get the number of results for the searchTerm
+	numResults := 0
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
 	
 	//add the <html> element
 	fmt.Fprint(w, "<html>")
-	
 	//add the <head> element
 	fmt.Fprint(w, "<head>")
-	
 	//add the title of the document and the search term
 	fmt.Fprintf(w, "<title>Distru :: Searching \"%s\"</title>", searchTerm)
-	
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
 	file, err := ioutil.ReadFile("search.css")
@@ -37,31 +36,31 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprint(w, string(file))
 	fmt.Fprint(w, "</style>")
-			
 	//close the <head> element
 	fmt.Fprint(w, "</head>")
-
 	//add the <body> element
 	fmt.Fprint(w, "<body>")
+	//display the search term at the top
+	fmt.Fprintf(w, "<div class=\"searchterm\">%d results for <strong>%s</strong></div>", numResults, searchTerm)
+	
+	//TODO: SEARCH HERE.
+	//this is a temporary example of what searches will look like
+	fmt.Fprint(w, "<div class=\"results\">test</div>")
+	fmt.Fprint(w, "<div class=\"results\">test2</div>")
 	
 	//close the <body> element
 	fmt.Fprint(w, "</body>")
-
 	//close the <html> element
 	fmt.Fprint(w, "</html>")
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
-
 	//add the <html> element
 	fmt.Fprint(w, "<html>")
-
 	//add the <head> element
 	fmt.Fprint(w, "<head>")
-	
 	//add the title of the document
 	fmt.Fprint(w, "<title>Distru :: Search Freely</title>")
-
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
 	file, err := ioutil.ReadFile("index.css")
@@ -70,28 +69,20 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	fmt.Fprint(w, string(file))
 	fmt.Fprint(w, "</style>")
-
 	//add the javascript file
 	fmt.Fprint(w, "<script type=\"text/javascript\">")
 	fmt.Fprint(w, "function searchThis() {if (event.keyCode == 13) window.location = '/search/'+document.getElementById('search').value;}")
 	fmt.Fprint(w, "</script>")
-
 	//close the <head> element
 	fmt.Fprint(w, "</head>")
-
 	//add the <body> element
 	fmt.Fprint(w, "<body>")
-
 	//add the name that hovers above the search bar
 	fmt.Fprint(w, "<div class = \"name\">Distru</div>")
-
 	//add the form
 	fmt.Fprint(w, "<input type=\"text\" onkeydown=\"searchThis()\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/>")
-
 	//close the <body> element
 	fmt.Fprint(w, "</body>")
-
 	//close the <html> element
 	fmt.Fprint(w, "</html>")
-
 }
