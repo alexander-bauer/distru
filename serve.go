@@ -58,14 +58,14 @@ func handleConn(conn net.Conn) {
 	}
 	req := string(b)
 	
-	switch {
-		case req == GETGOB: {
+	switch req {
+		case GETGOB: {
 			Idx.Gob(w)
 			conn.Close()
 			log.Println(prefix, "served gob")
 		} //close case
 		
-		case req == GETJSON: {
+		case GETJSON: {
 			//Then serve a json encoded index.
 			_, err := w.WriteString(Idx.JSON())
 			if err != nil {
@@ -84,7 +84,7 @@ func handleConn(conn net.Conn) {
 			log.Println(prefix, "served json")
 		} //close case
 		
-		case req == NEWSITE: {
+		case NEWSITE: {
 			site, err := r.ReadBytes('\n')
 			if err != nil {
 				log.Println(prefix, err)
