@@ -56,17 +56,18 @@ func Indexer(index *Index, pending <-chan string) {
 }
 
 type site struct {
-	URL   string           //domain or IP that identifies this Block
-	Pages map[string]*page //nonordered map of pages on the server
+	Pages map[string]*page //Nonordered map of pages on the server
+	Links []string         //List of all unique links collected from all pages on the site
 }
 
 func newSite(target string) site {
 	//Initialize an empty tree and set isFinished to false.
-	tree := []string{}
+	tree := make(map[string]struct{})
+	links := make(map[string]struct{})
 	isFinished := false
 
 	pages := make(map[string]*page)
-	pages["/"], tree = getPage(target, "/")
+	pages["/"], tree, links = getPage(target, "/")
 	//Grab the root page first, then we're going to build on the tree.
 	//We'll loop until there are no more unresolved pages. Then we'll
 	//set isFinished to true, and break the loop.
@@ -74,8 +75,8 @@ func newSite(target string) site {
 		//We set isFinished to true here. If we're not actually
 		//finished, the following loop will set it to false.
 		isFinished = true
-		for i := range tree {
-			if pages[tree[i]] != nil {
+		for k, _ := range tree {
+			if pages[k] != nil {
 				//If the page has been indexed already,
 				//ignore it.
 				continue
@@ -84,29 +85,38 @@ func newSite(target string) site {
 			//need at least one more iteration.
 			isFinished = false
 			//Then we index the page and grab the new tree.
-			newTree := []string{}
-			pages[tree[i]], newTree = getPage(target, tree[i])
+			newTree := make(map[string]struct{})
+			newLinks := make(map[string]struct{})
+			pages[k], newTree, newLinks = getPage(target, k)
 
-			//Then we append the new tree to the old one,
-			tree = append(tree, newTree...)
+			//Then we put all of the new values into the old maps,
+			for kk, vv := range newTree {
+				tree[kk] = vv
+			}
+			for kk, vv := range newLinks {
+				links[kk] = vv
+			}
 			//and start the loop over again.
 		}
 	}
+	linkArray := make([]string, 0, len(links))
+	for k, _ := range links {
+		linkArray = append(linkArray, k)
+	}
 
 	site := site{
-		URL:   target,
 		Pages: pages,
+		Links: linkArray,
 	}
 	return site
 }
 
 type page struct {
-	Path  string   //path to page on the webserver (relative to root page)
-	Links []string //list of external links on the page
+	Content string //Temporary storage for the content of the page
 }
 
-//getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The external links are put into the Links element of the page structure. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, possibly with duplicates, as a []string, in which every element is true.
-func getPage(target string, path string) (*page, []string) {
+//getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, without duplicates, as a map[string]struct{}. All unique external links on the page are returned in the second map[string]struct{}.
+func getPage(target string, path string) (*page, map[string]struct{}, map[string]struct{}) {
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
@@ -114,14 +124,14 @@ func getPage(target string, path string) (*page, []string) {
 		target = "http://" + target
 		accessURI, err = url.ParseRequestURI(target + path)
 		if err != nil {
-			return &page{}, nil
+			return &page{}, nil, nil
 		}
 	}
 
 	//Get the content of the webpage via HTTP, return blank if it fails.
 	resp, err := http.Get(accessURI.String())
 	if err != nil {
-		return &page{}, nil
+		return &page{}, nil, nil
 	}
 	defer resp.Body.Close()
 	//Get the body of the request as a []byte.
@@ -132,7 +142,7 @@ func getPage(target string, path string) (*page, []string) {
 	//Now we're going to move on to parsing the links.
 	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
 	if err != nil {
-		return &page{}, nil
+		return &page{}, nil, nil
 	}
 
 	//Use pattern matching to find all link tags on the page,
@@ -142,8 +152,8 @@ func getPage(target string, path string) (*page, []string) {
 	//Now parse them into a list of actual links.
 	//We're going to separate the internal and external
 	//links in the same step.
-	internalLinks := make([]string, 0, len(tags)) //length 0, reserve space
-	externalLinks := make([]string, 0, len(tags)) //for len(tags) items
+	internalLinks := make(map[string]struct{}, len(tags)) //Reserve space
+	externalLinks := make(map[string]struct{}, len(tags)) //for len(tags) items.
 
 	for i := range tags {
 		//tags is an array containing both the "href=" and the link
@@ -152,18 +162,18 @@ func getPage(target string, path string) (*page, []string) {
 		if !strings.Contains(link, "http://") && !strings.Contains(link, "https://") {
 			//If the string doesn't contain http://,
 			//resolve it to an absolute 
-			internalLinks = append(internalLinks, join(path, link))
+			internalLinks[join(path, link)] = struct{}{}
 		} else {
 			//If the string directs to this site (with http://)
 			//then put it in internal links
 			if strings.HasPrefix(link, target) {
 				//(but trim the website name
-				internalLinks = append(internalLinks, join(path, link[len(target):]))
+				internalLinks[join(path, link[len(target):])] = struct{}{}
 				//and jump back to the beginning of the for,)
 				continue
 			}
 			//otherwise, put it in externals.
-			externalLinks = append(externalLinks, link)
+			externalLinks[link] = struct{}{}
 		}
 	}
 
@@ -171,9 +181,8 @@ func getPage(target string, path string) (*page, []string) {
 	//TODO
 
 	return &page{
-		Path:  path,
-		Links: externalLinks,
-	}, internalLinks
+		Content: body,
+	}, internalLinks, externalLinks
 }
 
 func join(source, target string) string {
