@@ -16,9 +16,39 @@ func ServeWeb() {
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
+	//get the search term and save it as searchTerm
 	searchTerm := r.URL.Path[len("/search/"):]
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
-	fmt.Fprint(w, searchTerm)
+	
+	//add the <html> element
+	fmt.Fprint(w, "<html>")
+	
+	//add the <head> element
+	fmt.Fprint(w, "<head>")
+	
+	//add the title of the document and the search term
+	fmt.Fprintf(w, "<title>Distru :: Searching \"%s\"</title>", searchTerm)
+	
+	//add the stylesheet
+	fmt.Fprint(w, "<style type=\"text/css\">")
+	file, err := ioutil.ReadFile("search.css")
+	if err != nil {
+		panic(err)
+	}
+	fmt.Fprint(w, string(file))
+	fmt.Fprint(w, "</style>")
+			
+	//close the <head> element
+	fmt.Fprint(w, "</head>")
+
+	//add the <body> element
+	fmt.Fprint(w, "<body>")
+	
+	//close the <body> element
+	fmt.Fprint(w, "</body>")
+
+	//close the <html> element
+	fmt.Fprint(w, "</html>")
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,10 +58,13 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 
 	//add the <head> element
 	fmt.Fprint(w, "<head>")
+	
+	//add the title of the document
+	fmt.Fprint(w, "<title>Distru :: Search Freely</title>")
 
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
-	file, err := ioutil.ReadFile("style.css")
+	file, err := ioutil.ReadFile("index.css")
 	if err != nil {
 		panic(err)
 	}
