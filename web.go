@@ -28,6 +28,11 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<head>")
 	//add the title of the document and the search term
 	fmt.Fprintf(w, "<title>Distru :: Searching \"%s\"</title>", searchTerm)
+	
+	//add the shortcuticon
+	//BUG: THIS DOESNT WORK YET
+	fmt.Fprint(w, "<link rel=\"shortcut icon\" href=\"img/icon_16.png\">")
+	
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
 	file, err := ioutil.ReadFile("ui/search.css")
@@ -61,6 +66,11 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<head>")
 	//add the title of the document
 	fmt.Fprint(w, "<title>Distru :: Search Freely</title>")
+	
+	//add the shortcuticon
+	//BUG: THIS DOESNT WORK YET
+	fmt.Fprint(w, "<link rel=\"shortcut icon\" href=\"img/icon_16.png\">")
+	
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
 	file, err := ioutil.ReadFile("ui/index.css")
