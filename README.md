@@ -1,4 +1,4 @@
-![Distru](img/distru.png)
+![Distru](./img/distru.png)
 
 **Distru** is a still **in-progress** tool, written in [Go](http://golang.org), designed to act as a distributed search engine for [Hyperboria](https://projectmeshnet.org). Distru is not a single "search engine server," but rather a small program designed to maintain information about nearby servers, so that Hyperboria nodes can quickly share discovered sites.
 
