@@ -30,7 +30,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "<title>Distru :: Searching \"%s\"</title>", searchTerm)
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
-	file, err := ioutil.ReadFile("search.css")
+	file, err := ioutil.ReadFile("ui/search.css")
 	if err != nil {
 		panic(err)
 	}
@@ -63,7 +63,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "<title>Distru :: Search Freely</title>")
 	//add the stylesheet
 	fmt.Fprint(w, "<style type=\"text/css\">")
-	file, err := ioutil.ReadFile("index.css")
+	file, err := ioutil.ReadFile("ui/index.css")
 	if err != nil {
 		panic(err)
 	}
