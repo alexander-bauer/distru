@@ -66,8 +66,11 @@ func newSite(target string) site {
 	links := make(map[string]struct{})
 	isFinished := false
 
+	//Create an http.Client to control the webpage requests.
+	client := http.Client{}
+
 	pages := make(map[string]*page)
-	pages["/"], tree, links = getPage(target, "/")
+	pages["/"], tree, links = getPage(target, "/", client)
 	//Grab the root page first, then we're going to build on the tree.
 	//We'll loop until there are no more unresolved pages. Then we'll
 	//set isFinished to true, and break the loop.
@@ -87,7 +90,7 @@ func newSite(target string) site {
 			//Then we index the page and grab the new tree.
 			newTree := make(map[string]struct{})
 			newLinks := make(map[string]struct{})
-			pages[k], newTree, newLinks = getPage(target, k)
+			pages[k], newTree, newLinks = getPage(target, k, client)
 
 			//Then we put all of the new values into the old maps,
 			for kk, vv := range newTree {
@@ -116,7 +119,7 @@ type page struct {
 }
 
 //getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, without duplicates, as a map[string]struct{}. All unique external links on the page are returned in the second map[string]struct{}.
-func getPage(target string, path string) (*page, map[string]struct{}, map[string]struct{}) {
+func getPage(target, path string, client http.Client) (*page, map[string]struct{}, map[string]struct{}) {
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
@@ -128,8 +131,9 @@ func getPage(target string, path string) (*page, map[string]struct{}, map[string
 		}
 	}
 
-	//Get the content of the webpage via HTTP, return blank if it fails.
-	resp, err := http.Get(accessURI.String())
+	//Get the content of the webpage via HTTP, using the
+	//existing http.Client, and return blank if it fails.
+	resp, err := client.Get(accessURI.String())
 	if err != nil {
 		return &page{}, nil, nil
 	}
