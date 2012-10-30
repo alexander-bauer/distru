@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/gob"
 	"encoding/json"
+	"github.com/temoto/robotstxt.go"
 	"io"
 	"io/ioutil"
 	"log"
@@ -13,9 +14,22 @@ import (
 	"strings"
 )
 
+const (
+	BotName = "Distru"
+)
+
 type Index struct {
 	Sites map[string]site //A map of fully indexed webpages.
 	Queue chan string     `json:"-"` //The channel which controls Indexers
+}
+
+type site struct {
+	Pages map[string]*page //Nonordered map of pages on the server
+	Links []string         //List of all unique links collected from all pages on the site
+}
+
+type page struct {
+	Content string //Temporary storage for the content of the page
 }
 
 //Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
@@ -55,12 +69,8 @@ func Indexer(index *Index, pending <-chan string) {
 	}
 }
 
-type site struct {
-	Pages map[string]*page //Nonordered map of pages on the server
-	Links []string         //List of all unique links collected from all pages on the site
-}
-
 func newSite(target string) site {
+	target = "http://" + target
 	//Initialize an empty tree and set isFinished to false.
 	tree := make(map[string]struct{})
 	links := make(map[string]struct{})
@@ -68,6 +78,17 @@ func newSite(target string) site {
 
 	//Create an http.Client to control the webpage requests.
 	client := http.Client{}
+	//Use robotstxt to get the search engine permission.
+	rperm, err := getRobotsPermission(target)
+	if err != nil {
+		println(err.Error())
+	}
+
+	//Check if we are allowed to access /
+	if !rperm.Test("/") {
+		//If we aren't, return empty.
+		return site{}
+	}
 
 	pages := make(map[string]*page)
 	pages["/"], tree, links = getPage(target, "/", client)
@@ -79,8 +100,9 @@ func newSite(target string) site {
 		//finished, the following loop will set it to false.
 		isFinished = true
 		for k, _ := range tree {
-			if pages[k] != nil {
+			if pages[k] != nil || !rperm.Test(k) {
 				//If the page has been indexed already,
+				//or if we're not allowed to access it,
 				//ignore it.
 				continue
 			}
@@ -114,8 +136,34 @@ func newSite(target string) site {
 	return site
 }
 
-type page struct {
-	Content string //Temporary storage for the content of the page
+func getRobotsPermission(target string) (*robotstxt.Group, error) {
+	//We're going to define a routine with which to fail.
+	fail := func(err error) (*robotstxt.Group, error) {
+		//Since we're failing here when there is no file available,
+		//craft a stand-in one to be parsed instead.
+		robots, err2 := robotstxt.FromBytes([]byte("User-agent: *\nAllow: /"))
+		if err2 != nil {
+			println(err2.Error())
+			return nil, err
+		}
+		return robots.FindGroup(BotName), err
+	}
+	//Use robotstxt here.
+	resp, err := http.Get(target + "/robots.txt")
+	if err != nil {
+		return fail(err)
+	}
+	defer resp.Body.Close()
+	robots, err := robotstxt.FromResponse(resp)
+	if err != nil {
+		return fail(err)
+	}
+	group := robots.FindGroup(BotName)
+	if group == nil {
+		//BUG(DuoNoxSol): This does not raise a real error.
+		return fail(nil)
+	}
+	return group, nil
 }
 
 //getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, without duplicates, as a map[string]struct{}. All unique external links on the page are returned in the second map[string]struct{}.
@@ -123,12 +171,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
-		//Prepend http:// permanently
-		target = "http://" + target
-		accessURI, err = url.ParseRequestURI(target + path)
-		if err != nil {
-			return &page{}, nil, nil
-		}
+		return &page{}, nil, nil
 	}
 
 	//Get the content of the webpage via HTTP, using the
