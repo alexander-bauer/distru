@@ -26,7 +26,7 @@ func Serve() {
 	//Start a new goroutine for the webserver.
 	go ServeWeb()
 
-	//Start the Index Maintainer, and recieve the input channel for it.
+	//Start the Index Maintainer for Idx.
 	MaintainIndex(Idx, 1)
 
 	//Put a new domain into the queue.

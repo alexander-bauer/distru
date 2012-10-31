@@ -79,10 +79,7 @@ func newSite(target string) site {
 	//Create an http.Client to control the webpage requests.
 	client := http.Client{}
 	//Use robotstxt to get the search engine permission.
-	rperm, err := getRobotsPermission(target)
-	if err != nil {
-		println(err.Error())
-	}
+	rperm, _ := getRobotsPermission(target)
 
 	//Check if we are allowed to access /
 	if !rperm.Test("/") {
