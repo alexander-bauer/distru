@@ -138,11 +138,7 @@ func getRobotsPermission(target string) (*robotstxt.Group, error) {
 	fail := func(err error) (*robotstxt.Group, error) {
 		//Since we're failing here when there is no file available,
 		//craft a stand-in one to be parsed instead.
-		robots, err2 := robotstxt.FromBytes([]byte("User-agent: *\nAllow: /"))
-		if err2 != nil {
-			println(err2.Error())
-			return nil, err
-		}
+		robots, _ := robotstxt.FromBytes([]byte("User-agent: *\nAllow: /"))
 		return robots.FindGroup(BotName), err
 	}
 	//Use robotstxt here.
