@@ -43,6 +43,7 @@ func Serve() {
 
 //handleConn is the internal server function for distru. When it recieves a connection, it logs the RemoteAddr of the connection, then serves a gob of the in-memory index (Idx) to it. It closes the connection immediately afterward.
 func handleConn(conn net.Conn) {
+	defer conn.Close()
 	//Save the connection detail for simplicity of logging.
 	prefix := "<-" + conn.RemoteAddr().String() + ">"
 	log.Println(prefix, "new connection")
