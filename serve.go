@@ -88,13 +88,15 @@ func handleConn(conn net.Conn) {
 
 	case NEWSITE:
 		{
-			site, err := r.ReadBytes('\n')
+			siteRequest, err := r.ReadBytes('\n')
 			if err != nil {
 				log.Println(prefix, err)
 				conn.Close()
 			}
-			Idx.Queue <- string(site[:len(site)-2])
+			site := string(siteRequest[:len(siteRequest)-2])
+			log.Println(prefix, "command to index:", site)
 			conn.Close()
+			Idx.Queue <- site
 		} //close case
 
 	default:
