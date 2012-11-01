@@ -81,7 +81,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "</style>")
 	//add the javascript file
 	fmt.Fprint(w, "<script type=\"text/javascript\">")
-	fmt.Fprint(w, "function searchThis() {if (event.keyCode == 13) window.location = '/search/'+document.getElementById('search').value;}")
+	fmt.Fprint(w, "function searchThis() {if (event.keyCode == 13) window.location += 'search/'+document.getElementById('search').value;}")
 	fmt.Fprint(w, "</script>")
 	//close the <head> element
 	fmt.Fprint(w, "</head>")
