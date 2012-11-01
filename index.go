@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"encoding/gob"
 	"encoding/json"
 	"github.com/temoto/robotstxt.go"
@@ -9,6 +10,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"net"
 	"path"
 	"regexp"
 	"strings"
@@ -30,6 +32,52 @@ type site struct {
 
 type page struct {
 	Content string //Temporary storage for the content of the page
+}
+
+//Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
+func (index *Index) MergeRemote(remote string) error {
+	//Dial the connection here.
+	conn, err := net.Dial("tcp", remote)
+	if err != nil {
+		return err
+	}
+	//Initialize a new reader and writer.
+	r, w := bufio.NewReader(conn), bufio.NewWriter(conn)
+	_, err = w.WriteString(GETJSON) //Request the JSON-encoded index.
+	if err != nil {
+		return err
+	}
+
+	err = w.Flush() //Flush the writer to the connection.
+	if err != nil {
+		return err
+	}
+
+	resp, err := r.ReadBytes('\n') //Read the response.
+	if err != nil {
+		return err
+	}
+
+	remoteIndex := &Index{}
+	err = json.Unmarshal(resp, remoteIndex) //Marshal into an index object
+	if err != nil {
+		return err
+	}
+	isPresent := false
+
+	for k, v := range remoteIndex.Sites {
+		//If the local index contains the site already,
+		//don't overwrite it.
+		_, isPresent = index.Sites[k]
+		if !isPresent {
+			//Otherwise, add the remote index's site
+			//to the local index.
+			index.Sites[k] = v
+		}
+		//Repeat until we've gone through all of the
+		//values in remoteIndex.
+	}
+	return nil
 }
 
 //Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
