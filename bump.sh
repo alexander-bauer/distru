@@ -89,13 +89,14 @@ then
 		exit 1
 	fi
 
+	TAGTYPE="-a"
 	if [[ $LEVEL == 0 ]] && [[ $SIGNBASE == TRUE ]]
 	then
-		SIGNING="-s"
+		TAGTYPE="-s"
 	fi
 
 	# Now we make the tag.
-	git tag $SIGNING -m v$NEWVER 
+	git tag $SIGNING -m "Version $NEWVER" v$NEWVER 
 
 	echo Tagged as v$NEWVER
 	exit 0
