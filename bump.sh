@@ -2,7 +2,7 @@
 # This script bumps the version number of Distru. The variable "Version"
 # should be declared as a constant in the file distru.go.
 #
-# To use: ver.sh <level> [--tag]
+# To use: bump.sh <level> [--tag]
 #
 # <level> is the depth of the bump, determined by number of periods
 # to the left of the number. For example, bumping v1 to v2 is a level
@@ -46,7 +46,7 @@ then
 fi
 
 VER=$(grep -P "Version =" $FILE \
-	| grep -o -P "[0-9][0-9]*(\.[0-9][0-9]*)*")
+	| grep -o -P "[0-9]+(\.[0-9]+)*")
 
 NEWVER=
 
