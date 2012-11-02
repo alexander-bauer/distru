@@ -15,8 +15,12 @@
 # --amend, to as to append the change to the most recent commit. This
 # script will then create a git tag with the version number, prepended
 # with "v".
+#
+# If --tag is enabled, and <level> is 0 (bumping base version) then
+# this script will create a GPG-signed tag by default.
 
 # DEFAULTS
+SIGNBASE=TRUE
 MAXLEVEL=2
 FILE=$(dirname $0)/distru.go
 
@@ -79,10 +83,21 @@ then
 	# Then amend it to the most recent commit.
 	git commit $3
 
-	# Now we make the tag.
-	git tag v$NEWVER
-	echo Tagged as v$NEWVER
+	if [[ $? != 0 ]]
+	then
+		echo Commit and tagging aborted.
+		exit 1
+	fi
 
+	if [[ $LEVEL == 0 ]] && [[ $SIGNBASE == TRUE ]]
+	then
+		SIGNING="-s"
+	fi
+
+	# Now we make the tag.
+	git tag $SIGNING -m v$NEWVER 
+
+	echo Tagged as v$NEWVER
 	exit 0
 fi
 
