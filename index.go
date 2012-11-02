@@ -269,6 +269,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
 	
+	//only lowercase letters!
 	b = bytes.ToLower(b)
 	
 	//Compile the pattern for stripping HTML
