@@ -283,12 +283,15 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 
 	//For every word...
 	for i := range content {
-		//if its length is two or more...
-		if len(content[i]) > 1 {
-			//increment that word's counter by one
-			wc[string(content[i])] += 1
+		word := string(content[i])
+		//if the word is less than two characters long
+		//or is one of the listed common words,
+		if len(word) < 2 || word == "is" || word == "or" || word == "a" || word == "and" || word == "the" || word == "are" || word == "of" || word == "to" {
+			//then skip it.
+			continue
 		}
-		//otherwise, continue.
+		//Otheriwse, increment that word's counter by one.
+		wc[word] += 1
 	}
 
 	return &page{
