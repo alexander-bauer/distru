@@ -16,6 +16,12 @@ then
 	killall distru
 fi
 
+go fmt
+if [[ $? != 0 ]]
+then
+	exit
+fi
+
 go build
 if [[ $? != 0 ]]
 then
