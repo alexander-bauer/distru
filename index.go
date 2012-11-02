@@ -227,6 +227,14 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Convert to string real quick.
 	body := string(b)
 
+	//Compile the pattern for stripping HTML
+	p, err := regexp.Compile("<([^>]*)>")
+	if err != nil {
+		return &page{}, nil, nil
+	}
+	//apply the pattern
+	body = string(p.ReplaceAll(b, []byte("")))
+
 	//Now we're going to move on to parsing the links.
 	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
 	if err != nil {
