@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/gob"
 	"encoding/json"
 	"github.com/temoto/robotstxt.go"
@@ -14,7 +15,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-	"bytes"
 )
 
 const (
@@ -268,19 +268,18 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
-	
+
 	//only lowercase letters!
 	b = bytes.ToLower(b)
-	
+
 	//Compile the pattern for stripping HTML
-	p, err := regexp.Compile("<([^>]*)>|\n|\u0009")
+	p, err := regexp.Compile("<([^>]*)>|\n|&[a-z]+|\u0009")
 	if err != nil {
 		return &page{}, nil, nil
 	}
 	//apply the pattern
 	body = string(p.ReplaceAll(b, []byte("")))
-	
-	
+
 	return &page{
 		Content: body,
 	}, internalLinks, externalLinks
