@@ -14,6 +14,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"bytes"
 )
 
 const (
@@ -268,8 +269,10 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
 	
+	b = bytes.ToLower(b)
+	
 	//Compile the pattern for stripping HTML
-	p, err := regexp.Compile("<([^>]*)>")
+	p, err := regexp.Compile("<([^>]*)>|\n|\u0009")
 	if err != nil {
 		return &page{}, nil, nil
 	}
