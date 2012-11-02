@@ -32,7 +32,7 @@ type site struct {
 }
 
 type page struct {
-	Content string //Temporary storage for the content of the page
+	WordCount map[string]int //Temporary storage for the content of the page
 }
 
 //Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
@@ -273,15 +273,26 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	b = bytes.ToLower(b)
 
 	//Compile the pattern for stripping HTML
-	p, err := regexp.Compile("<([^>]*)>|\n|&[a-z]+|\u0009")
+	p, err := regexp.Compile("<([^>]*)>|\n|\t|&[a-z]+|[.,]+ |;|\u0009")
 	if err != nil {
 		return &page{}, nil, nil
 	}
-	//apply the pattern
-	body = string(p.ReplaceAll(b, []byte("")))
+	//Apply the pattern and split on spaces.
+	content := bytes.Split(p.ReplaceAll(b, []byte("")), []byte(" "))
+	wc := make(map[string]int)
+
+	//For every word...
+	for i := range content {
+		//if its length is two or more...
+		if len(content[i]) > 1 {
+			//increment that word's counter by one
+			wc[string(content[i])] += 1
+		}
+		//otherwise, continue.
+	}
 
 	return &page{
-		Content: body,
+		WordCount: wc,
 	}, internalLinks, externalLinks
 }
 
