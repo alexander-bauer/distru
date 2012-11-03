@@ -87,6 +87,9 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "</head>")
 	//add the <body> element
 	fmt.Fprint(w, "<body>")
+	//add the version number
+	fmt.Fprintf(w, "<div class = \"version\">Version %s</div>", Version)
+	
 	//add the name that hovers above the search bar
 	fmt.Fprint(w, "<div class = \"name\">Distru</div>")
 	//add the form
