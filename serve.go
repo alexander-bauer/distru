@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	GETGOB  = "distru gob\r\n"   //Requests a gob of the current index.
-	GETJSON = "distru json\r\n"  //Requests a json-encoded current index.
-	NEWSITE = "distru index\r\n" //Prefaces a request to index a new site.
+	GETGOB  = "distru gob\r\n"    //Requests a gob of the current index.
+	GETJSON = "distru json\r\n"   //Requests a json-encoded current index.
+	NEWSITE = "distru index\r\n"  //Prefaces a request to index a new site.
+	SEARCH  = "distru search\r\n" //Performs a search request.
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
@@ -100,7 +101,19 @@ func handleConn(conn net.Conn) {
 			conn.Close()
 			Idx.Queue <- site
 		} //close case
-
+	case SEARCH:
+		{
+			searchRequest, err := r.ReadBytes('\n')
+			if err != nil {
+				log.Println(prefix, err)
+				conn.Close()
+			}
+			term := string(searchRequest[:len(searchRequest)-2])
+			log.Println(prefix, "searching:", term)
+			conn.Close()
+			results := Idx.Search([]string{term}, 10)
+			log.Println(prefix, "search results:", len(results))
+		}
 	default:
 		{
 			//Display the request

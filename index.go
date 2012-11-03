@@ -26,7 +26,28 @@ type site struct {
 }
 
 type page struct {
-	WordCount map[string]int //Temporary storage for the content of the page
+	Link      string         //The fully qualified link to this page
+	WordCount map[string]int `json:"-"` //Temporary storage for the content of the page
+}
+
+//Index.Search
+func (index *Index) Search(terms []string, maxResults int) []*page {
+	results := make([]*page, 0)
+	for _, v := range index.Sites {
+		for _, vv := range v.Pages {
+			//For each term, we get the number and presence
+			//of the word for a particular page. The number
+			//is currently discarded, because we can't rank
+			//the relevance of pages.
+			for i := range terms {
+				_, isPresent := vv.WordCount[terms[i]]
+				if isPresent {
+					results = append(results, vv)
+				}
+			}
+		}
+	}
+	return results
 }
 
 //Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.

@@ -97,6 +97,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	}
 
 	return &page{
+		Link:      target + path,
 		WordCount: wc,
 	}, internalLinks, externalLinks
 }
