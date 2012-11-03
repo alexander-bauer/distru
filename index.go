@@ -16,8 +16,8 @@ const (
 )
 
 type Index struct {
-	Sites map[string]site //A map of fully indexed webpages.
-	Queue chan string     `json:"-"` //The channel which controls Indexers
+	Sites map[string]*site //A map of fully indexed webpages.
+	Queue chan string      `json:"-"` //The channel which controls Indexers
 }
 
 type site struct {
@@ -106,18 +106,21 @@ func MaintainIndex(index *Index, numIndexers int) {
 
 func Indexer(index *Index, pending <-chan string) {
 	for target := range pending {
+		newSite := newSite(target)
+		if newSite == nil {
+			//If we got an error for some reason,
+			log.Println("indexer> failed to add \"" + target + "\"")
+			//discard it and continue.
+			continue
+		}
 		//Update the target site.
-		index.Sites[target] = newSite(target)
+		index.Sites[target] = newSite
 		log.Println("indexer> added \"" + target + "\"")
 	}
 }
 
-func newSite(target string) site {
+func newSite(target string) *site {
 	target = "http://" + target
-	//Initialize an empty tree and set isFinished to false.
-	tree := make(map[string]struct{})
-	links := make(map[string]struct{})
-	isFinished := false
 
 	//Create an http.Client to control the webpage requests.
 	client := http.Client{}
@@ -127,14 +130,22 @@ func newSite(target string) site {
 	//Check if we are allowed to access /
 	if !rperm.Test("/") {
 		//If we aren't, return empty.
-		return site{}
+		return nil
 	}
 
 	pages := make(map[string]*page)
-	pages["/"], tree, links = getPage(target, "/", client)
+	newPage, tree, links := getPage(target, "/", client)
+	if newPage == nil {
+		//If we didn't get the root page properly,
+		//return nil.
+		return nil
+	}
+	//If we did get it, then continue normally.
+	pages["/"] = newPage
 	//Grab the root page first, then we're going to build on the tree.
 	//We'll loop until there are no more unresolved pages. Then we'll
 	//set isFinished to true, and break the loop.
+	isFinished := false
 	for isFinished == false {
 		//We set isFinished to true here. If we're not actually
 		//finished, the following loop will set it to false.
@@ -150,9 +161,14 @@ func newSite(target string) site {
 			//need at least one more iteration.
 			isFinished = false
 			//Then we index the page and grab the new tree.
-			newTree := make(map[string]struct{})
-			newLinks := make(map[string]struct{})
-			pages[k], newTree, newLinks = getPage(target, k, client)
+			newPage, newTree, newLinks := getPage(target, k, client)
+			if newPage == nil {
+				//If we got a nil response from getPage,
+				//then continue and drop this page
+				continue
+			}
+			//If we got a good response, then put it in the map.
+			pages[k] = newPage
 
 			//Then we put all of the new values into the old maps,
 			for kk, vv := range newTree {
@@ -169,7 +185,7 @@ func newSite(target string) site {
 		linkArray = append(linkArray, k)
 	}
 
-	site := site{
+	site := &site{
 		Pages: pages,
 		Links: linkArray,
 	}

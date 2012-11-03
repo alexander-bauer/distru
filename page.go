@@ -15,14 +15,14 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
-		return &page{}, nil, nil
+		return nil, nil, nil
 	}
 
 	//Get the content of the webpage via HTTP, using the
 	//existing http.Client, and return blank if it fails.
 	resp, err := client.Get(accessURI.String())
 	if err != nil {
-		return &page{}, nil, nil
+		return nil, nil, nil
 	}
 	defer resp.Body.Close()
 	//Get the body of the request as a []byte.
@@ -33,7 +33,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Now we're going to move on to parsing the links.
 	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
 	if err != nil {
-		return &page{}, nil, nil
+		return nil, nil, nil
 	}
 
 	//Use pattern matching to find all link tags on the page,
@@ -77,7 +77,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Compile the pattern for stripping HTML
 	p, err := regexp.Compile("<([^>]*)>|\n|\t|&[a-z]+|[.,]+ |;|\u0009")
 	if err != nil {
-		return &page{}, nil, nil
+		return nil, nil, nil
 	}
 	//Apply the pattern and split on spaces.
 	content := bytes.Split(p.ReplaceAll(b, []byte("")), []byte(" "))
