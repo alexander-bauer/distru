@@ -110,9 +110,17 @@ func handleConn(conn net.Conn) {
 			}
 			term := string(searchRequest[:len(searchRequest)-2])
 			log.Println(prefix, "searching:", term)
-			conn.Close()
 			results := Idx.Search([]string{term}, 10)
 			log.Println(prefix, "search results:", len(results))
+			for i := range results {
+				_, err := w.WriteString(results[i].Link + "\n")
+				if err != nil {
+					log.Println(prefix, err)
+					conn.Close()
+				}
+			}
+			w.Flush()
+			conn.Close()
 		}
 	default:
 		{
