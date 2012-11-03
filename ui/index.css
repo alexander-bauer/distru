@@ -1,5 +1,9 @@
 @charset "UTF-8";
 
+html {
+	height: 100%;
+}
+
 body {
 	background-color: #ADD8E6 !important; 
 	background: rgb(254,255,255);
@@ -16,6 +20,10 @@ body {
 	height: 100%;
 	position: absolute;
 }
+
+
+
+
 
 .name {
 	color: #000;
@@ -40,8 +48,10 @@ body {
 	border-radius: 10px;
 	box-shadow: 0px 0px 13px #333;
 	font-family: Helvetica;
+	font-size: 10px;
 	width: 400px;
-	height: 30px;
+	overflow:hidden;
+	height: 35px;
 	position: fixed;
     margin-left: -200px;
     margin-top: -15px;
