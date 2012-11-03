@@ -17,6 +17,7 @@ const (
 
 //Serve is the primary function of distru. It listens on the tcp port 9049 for incoming connections, then passes them directly to handleConn.
 func Serve() {
+	log.Println("Distru version", Version)
 	ln, err := net.Listen("tcp", ":9049")
 	if err != nil {
 		log.Fatal("Could not start server:", err)
