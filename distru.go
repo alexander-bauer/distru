@@ -1,7 +1,7 @@
 package main
 
 const (
-	Version = "0.3.2"
+	Version = "0.3.3"
 )
 
 var Idx = &Index{Sites: make(map[string]*site)}
