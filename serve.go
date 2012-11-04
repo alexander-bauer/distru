@@ -66,24 +66,21 @@ func handleConn(conn net.Conn) {
 	case GETGOB:
 		{
 			Idx.Gob(w)
-			conn.Close()
 			log.Println(prefix, "served gob")
+			return
 		} //close case
-
 	case GETJSON:
 		{
 			//Then serve a json encoded index.
 			_, err := w.WriteString(Idx.JSON())
 			if err != nil {
 				log.Println(prefix, "error serving json:", err)
-				conn.Close()
 				return
 			} //close if
 			//and flush it to the connection.
 			err = w.Flush()
 			if err != nil {
 				log.Println(prefix, "error serving json:", err)
-				conn.Close()
 				return
 			} //close if
 			conn.Close()
@@ -95,7 +92,7 @@ func handleConn(conn net.Conn) {
 			siteRequest, err := r.ReadBytes('\n')
 			if err != nil {
 				log.Println(prefix, err)
-				conn.Close()
+				return
 			}
 			site := string(siteRequest[:len(siteRequest)-2])
 			log.Println(prefix, "command to index:", site)
