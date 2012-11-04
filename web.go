@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"strconv"
 )
 
 func ServeWeb() {
@@ -20,30 +21,21 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//get the number of results for the searchTerm
 	numResults := 2
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
-	
+
 	//load external files
 	css, err := ioutil.ReadFile("ui/search.css")
 	if err != nil {
 		panic(err)
 	}
-	
+
 	//add the page
-	w.Write([]byte("<html><head><title>Distru :: Searching "))
-	w.Write([]byte(searchTerm))
-	w.Write([]byte("</title><style type=\"text/css\">"))
+	w.Write([]byte("<html><head><title>Distru :: Searching " + searchTerm + "</title><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class=\"searchterm\">"))
-	w.Write([]byte(string(numResults)))
-	w.Write([]byte(" results for <strong>"))
-	w.Write([]byte(searchTerm))
-	w.Write([]byte("</strong></div>"))
-	
+	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(numResults) + " results for <strong>" + searchTerm + "</strong></div>"))
+
 	//TODO: SEARCH HERE.
 	//THIS IS JUST AN EXAMPLE..
-	w.Write([]byte("<div class=\"results\">test</div>"))
-	
-	//close page
-	w.Write([]byte("</body></html>"))
+	w.Write([]byte("<div class=\"results\">test</div>" + "</body></html>"))
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
@@ -56,7 +48,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	
+
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Search Freely</title><style type=\"text/css\">"))
 	w.Write(css)
