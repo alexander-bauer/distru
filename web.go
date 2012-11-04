@@ -54,7 +54,5 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(css)
 	w.Write([]byte("</style><script type=\"text/javascript\">"))
 	w.Write(javascript)
-	w.Write([]byte("</script></head><body><div class = \"version\">"))
-	w.Write([]byte(Version))
-	w.Write([]byte("<div class = \"name\">Distru</div><input type=\"text\" onkeydown=\"searchThis();\" onkeypress=\"isEnter(event);\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/></body></html>"))
+	w.Write([]byte("</script></head><body><div class = \"version\">" + Version + "<div class = \"name\">Distru</div><input type=\"text\" onkeydown=\"searchThis();\" onkeypress=\"isEnter(event);\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/></body></html>"))
 }
