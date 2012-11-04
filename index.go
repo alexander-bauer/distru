@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"time"
 )
 
 const (
@@ -21,6 +22,7 @@ type Index struct {
 }
 
 type site struct {
+	Time  time.Time        //The time when the site finished indexing
 	Pages map[string]*page //Nonordered map of pages on the server
 	Links []string         //List of all unique links collected from all pages on the site
 }
@@ -50,8 +52,8 @@ func (index *Index) Search(terms []string, maxResults int) []*page {
 	return results
 }
 
-//Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
-func (index *Index) MergeRemote(remote string) error {
+//Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
+func (index *Index) MergeRemote(remote string, trustNew bool) error {
 	//Dial the connection here.
 	conn, err := net.Dial("tcp", remote)
 	if err != nil {
@@ -82,12 +84,11 @@ func (index *Index) MergeRemote(remote string) error {
 	isPresent := false
 
 	for k, v := range remoteIndex.Sites {
-		//If the local index contains the site already,
-		//don't overwrite it.
+		//If the site in the local index is not present, or if
+		//the remote index is trusted, *and* newer than the
+		//local one, add the remote site to the local index.
 		_, isPresent = index.Sites[k]
-		if !isPresent {
-			//Otherwise, add the remote index's site
-			//to the local index.
+		if !isPresent || (trustNew && index.Sites[k].Time.Before(v.Time)) {
 			index.Sites[k] = v
 		}
 		//Repeat until we've gone through all of the
@@ -207,6 +208,7 @@ func newSite(target string) *site {
 	}
 
 	site := &site{
+		Time:  time.Now(),
 		Pages: pages,
 		Links: linkArray,
 	}
