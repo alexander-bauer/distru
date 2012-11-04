@@ -55,10 +55,12 @@ func (index *Index) Search(terms []string, maxResults int) []*page {
 //Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
 func (index *Index) MergeRemote(remote string, trustNew bool) error {
 	//Dial the connection here.
-	conn, err := net.Dial("tcp", remote)
+	conn, err := net.Dial("tcp", remote+":9049")
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
+
 	//Initialize a new reader and writer.
 	r, w := bufio.NewReader(conn), bufio.NewWriter(conn)
 	_, err = w.WriteString(GETJSON) //Request the JSON-encoded index.
@@ -71,18 +73,19 @@ func (index *Index) MergeRemote(remote string, trustNew bool) error {
 		return err
 	}
 
-	resp, err := r.ReadBytes('\n') //Read the response.
+	//Create a new decoder for reading the JSON
+	//directly off the wire.
+	dec := json.NewDecoder(r)
+
+	var remoteIndex Index
+
+	//Decode into the remoteIndex object.
+	err = dec.Decode(&remoteIndex)
 	if err != nil {
 		return err
 	}
 
-	remoteIndex := &Index{}
-	err = json.Unmarshal(resp, remoteIndex) //Marshal into an index object
-	if err != nil {
-		return err
-	}
 	isPresent := false
-
 	for k, v := range remoteIndex.Sites {
 		//If the site in the local index is not present, or if
 		//the remote index is trusted, *and* newer than the
