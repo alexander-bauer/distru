@@ -104,18 +104,16 @@ func handleConn(conn net.Conn) {
 			searchRequest, err := r.ReadBytes('\n')
 			if err != nil {
 				log.Println(prefix, err)
-				conn.Close()
+				return
 			}
 			term := string(searchRequest[:len(searchRequest)-2])
 			log.Println(prefix, "searching:", term)
-			results := Idx.Search([]string{term}, 10)
-			log.Println(prefix, "search results:", len(results))
-			for i := range results {
-				_, err := w.WriteString(results[i].Link + "\n")
-				if err != nil {
-					log.Println(prefix, err)
-					conn.Close()
-				}
+			num, results := Idx.SearchToJSON([]string{term}, 10)
+			log.Println(prefix, "search results:", num)
+			_, err = w.Write(results)
+			if err != nil {
+				log.Println(prefix, err)
+				return
 			}
 			w.Flush()
 			conn.Close()
