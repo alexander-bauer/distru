@@ -12,6 +12,7 @@ const (
 	GETJSON = "distru json\r\n"   //Requests a json-encoded current index.
 	NEWSITE = "distru index\r\n"  //Prefaces a request to index a new site.
 	SEARCH  = "distru search\r\n" //Performs a search request.
+	SHARE   = "distru share\r\n"  //Wraps Idx.MergeRemote()
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
@@ -121,6 +122,23 @@ func handleConn(conn net.Conn) {
 			}
 			w.Flush()
 			conn.Close()
+		}
+	case SHARE:
+		{
+			shareRequest, err := r.ReadBytes('\n')
+			if err != nil {
+				log.Println(prefix, err)
+				conn.Close()
+			}
+			conn.Close()
+			remote := string(shareRequest[:len(shareRequest)-2])
+			log.Println(prefix, "merging index from:", remote)
+			err = Idx.MergeRemote(remote, true)
+			if err != nil {
+				log.Println(prefix, err)
+			} else {
+				log.Println(prefix, "merged from:", remote)
+			}
 		}
 	default:
 		{
