@@ -13,13 +13,15 @@ const (
 	NEWSITE = "distru index\r\n"  //Prefaces a request to index a new site.
 	SEARCH  = "distru search\r\n" //Performs a search request.
 	SHARE   = "distru share\r\n"  //Wraps Idx.MergeRemote()
+	SAVE    = "distru save\r\n"   //Saves the current configuration and index
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
 
 //Serve is the primary function of distru. It listens on the tcp port 9049 for incoming connections, then passes them directly to handleConn.
-func Serve() {
+func Serve(conf *config) {
 	log.Println("Distru version", Version)
+	log.Println("Configuration status:\n\tGenerated in:", conf.Version, "\n\tSites indexed:", len(conf.Idx.Sites))
 	ln, err := net.Listen("tcp", ":9049")
 	if err != nil {
 		log.Fatal("Could not start server:", err)
@@ -29,23 +31,20 @@ func Serve() {
 	//Start a new goroutine for the webserver.
 	go ServeWeb()
 
-	//Start the Index Maintainer for Idx.
-	MaintainIndex(Idx, 1)
-
-	//Put a new domain into the queue.
-	Idx.Queue <- "example.com"
+	//Start the Index Maintainer for the index.
+	MaintainIndex(conf.Idx, 1)
 
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			log.Fatal("Server error.")
 		}
-		go handleConn(conn)
+		go handleConn(conf, conn)
 	}
 }
 
 //handleConn is the internal server function for distru. When it recieves a connection, it logs the RemoteAddr of the connection, then serves a gob of the in-memory index (Idx) to it. It closes the connection immediately afterward.
-func handleConn(conn net.Conn) {
+func handleConn(conf *config, conn net.Conn) {
 	defer conn.Close()
 	//Save the connection detail for simplicity of logging.
 	prefix := "<-" + conn.RemoteAddr().String() + ">"
@@ -65,14 +64,14 @@ func handleConn(conn net.Conn) {
 	switch req {
 	case GETGOB:
 		{
-			Idx.Gob(w)
+			conf.Idx.Gob(w)
 			log.Println(prefix, "served gob")
 			return
 		} //close case
 	case GETJSON:
 		{
 			//Then serve a json encoded index.
-			_, err := w.WriteString(Idx.JSON())
+			_, err := w.WriteString(conf.Idx.JSON())
 			if err != nil {
 				log.Println(prefix, "error serving json:", err)
 				return
@@ -97,7 +96,7 @@ func handleConn(conn net.Conn) {
 			site := string(siteRequest[:len(siteRequest)-2])
 			log.Println(prefix, "command to index:", site)
 			conn.Close()
-			Idx.Queue <- site
+			conf.Idx.Queue <- site
 		} //close case
 	case SEARCH:
 		{
@@ -108,7 +107,7 @@ func handleConn(conn net.Conn) {
 			}
 			term := string(searchRequest[:len(searchRequest)-2])
 			log.Println(prefix, "searching:", term)
-			num, results := Idx.SearchToJSON([]string{term})
+			num, results := conf.Idx.SearchToJSON([]string{term})
 			log.Println(prefix, "search results:", num)
 			_, err = w.Write(results)
 			if err != nil {
@@ -128,12 +127,21 @@ func handleConn(conn net.Conn) {
 			conn.Close()
 			remote := string(shareRequest[:len(shareRequest)-2])
 			log.Println(prefix, "merging index from:", remote)
-			err = Idx.MergeRemote(remote, true)
+			err = conf.Idx.MergeRemote(remote, true)
 			if err != nil {
 				log.Println(prefix, err)
 			} else {
 				log.Println(prefix, "merged from:", remote)
 			}
+		}
+	case SAVE:
+		{
+			conn.Close()
+			err := conf.save(ConfPath)
+			if err != nil {
+				log.Println(prefix, "error saving to:", ConfPath)
+			}
+			log.Println(prefix, "saved to:", ConfPath)
 		}
 	default:
 		{

@@ -30,7 +30,7 @@ type site struct {
 type page struct {
 	Title     string         //The contents of the <title> tag
 	Link      string         //The fully qualified link to this page
-	WordCount map[string]int `json:"-"` //Temporary storage for the content of the page
+	WordCount map[string]int //Counts for every plaintext word on the webpage
 }
 
 //Index.Search returns the total number of results, and a []*page containing at most maxResults number of results.
@@ -115,7 +115,7 @@ func (index *Index) MergeRemote(remote string, trustNew bool) error {
 
 //Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
 func (index *Index) Gob(w io.Writer) {
-	gob.NewEncoder(w).Encode(Idx)
+	gob.NewEncoder(w).Encode(index)
 }
 
 //Index.JSON creates a JSON-encoded (encoding/json) and tab indented string from the parent index.
