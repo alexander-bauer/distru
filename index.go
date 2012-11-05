@@ -28,6 +28,7 @@ type site struct {
 }
 
 type page struct {
+	Title     string         //The contents of the <title> tag
 	Link      string         //The fully qualified link to this page
 	WordCount map[string]int `json:"-"` //Temporary storage for the content of the page
 }
