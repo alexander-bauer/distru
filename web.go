@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 func ServeWeb() {
@@ -18,9 +19,10 @@ func ServeWeb() {
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//get the search term and save it as searchTerm
 	searchTerm := r.URL.Path[len("/search/"):]
-	//get the number of results for the searchTerm
-	numResults := 2
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
+
+	//Perform the search.
+	num, _ := Idx.Search(strings.Split(searchTerm, " "), 10)
 
 	//load external files
 	css, err := ioutil.ReadFile("ui/search.css")
@@ -31,7 +33,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching " + searchTerm + "</title><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(numResults) + " results for <strong>" + searchTerm + "</strong></div>"))
+	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(num) + " results for <strong>" + searchTerm + "</strong></div>"))
 
 	//TODO: SEARCH HERE.
 	//THIS IS JUST AN EXAMPLE..
