@@ -38,7 +38,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(num) + " results for <strong>" + searchTerm + "</strong></div>"))
 
 	for i := range results {
-		w.Write([]byte("<div class=\"results\"><a href=\"" + results[i].Link + "\">" + results[i].Title + "</a></div>"))
+		w.Write([]byte("<div class=\"results\"><a href=\"" + results[i].Link + "\">" + results[i].Title + "</a><br/><div class =\"description\">Description</div><div class=\"url\">www.example.com</div></div>"))
 	}
 	w.Write([]byte("</body></html>"))
 }

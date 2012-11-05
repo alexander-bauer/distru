@@ -7,6 +7,16 @@ body {
 	font-family: Helvetica;	
 }
 
+a {
+	color: #000;
+	text-decoration: none;
+	font-weight: bold;
+}
+
+a:hover {
+	color: #ADD8E6;
+}
+
 .searchterm {
 	background-color: #FFF;
 	text-align: center;
@@ -27,4 +37,18 @@ body {
 	margin-right: auto;
 	margin-top: 10px;
 	border: 1px solid #CCC;
+}
+
+.description {
+	color: #333;
+}
+
+.url, a.url {
+	color: #CCC;
+	font-style:italic;
+	font-size: 10px;
+}
+
+a.url:hover {
+	color: #DDD;
 }
