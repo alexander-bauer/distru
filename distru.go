@@ -8,6 +8,6 @@ const (
 var Conf *config
 
 func main() {
-	Conf := GetConfig(ConfPath)
+	Conf = GetConfig(ConfPath)
 	Serve(Conf)
 }
