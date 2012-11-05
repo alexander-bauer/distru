@@ -2,13 +2,11 @@ package main
 
 import (
 	"bufio"
-	"encoding/gob"
 	"log"
 	"net"
 )
 
 const (
-	GETGOB  = "distru gob\r\n"    //Requests a gob of the current index.
 	GETJSON = "distru json\r\n"   //Requests a json-encoded current index.
 	NEWSITE = "distru index\r\n"  //Prefaces a request to index a new site.
 	SEARCH  = "distru search\r\n" //Performs a search request.
@@ -43,7 +41,7 @@ func Serve(conf *config) {
 	}
 }
 
-//handleConn is the internal server function for distru. When it recieves a connection, it logs the RemoteAddr of the connection, then serves a gob of the in-memory index (Idx) to it. It closes the connection immediately afterward.
+//handleConn is the internal server function for distru. When it recieves a connection, it waits for an instruction such as "distru json". It responds, then closes the connection.
 func handleConn(conf *config, conn net.Conn) {
 	defer conn.Close()
 	//Save the connection detail for simplicity of logging.
@@ -62,12 +60,6 @@ func handleConn(conf *config, conn net.Conn) {
 	req := string(b)
 
 	switch req {
-	case GETGOB:
-		{
-			conf.Idx.Gob(w)
-			log.Println(prefix, "served gob")
-			return
-		} //close case
 	case GETJSON:
 		{
 			//Then serve a json encoded index.
@@ -151,42 +143,4 @@ func handleConn(conf *config, conn net.Conn) {
 		} //close default case
 	} //close switch
 
-}
-
-//RecvIndex tries to recieve an index gob from a distru server (on tcp port 9049) running on the given url. It returns an empty index if it fails to do so.
-func RecvIndex(url string) *Index {
-	//Create the connection, from which the target server should immediately try to serve an index.
-	conn, err := net.Dial("tcp", url+":9049")
-	if err != nil {
-		log.Println("No response from: " + url)
-		return &Index{}
-	}
-
-	prefix := "->" + conn.RemoteAddr().String() + ">"
-
-	//When we're ready, create a reader, so we can retrieve the data from the connection, and a writer, so we can request it.
-	r := bufio.NewReader(conn)
-	w := bufio.NewWriter(conn)
-
-	//Request a gob from the target server
-	log.Println(prefix, "requesting gob")
-	_, err = w.WriteString(GETGOB)
-	if err != nil {
-		log.Println(prefix, "connection problem:", err)
-		conn.Close()
-		return &Index{}
-	}
-	err = w.Flush()
-	if err != nil {
-		log.Println(prefix, "connection problem:", err)
-		conn.Close()
-		return &Index{}
-	}
-
-	//Finally, try to use the gob decoder to form an index from the gob.
-	decoder := gob.NewDecoder(r)
-	index := &Index{}
-	decoder.Decode(index)
-
-	return index
 }

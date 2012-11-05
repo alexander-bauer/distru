@@ -2,10 +2,8 @@ package main
 
 import (
 	"bufio"
-	"encoding/gob"
 	"encoding/json"
 	"github.com/temoto/robotstxt.go"
-	"io"
 	"log"
 	"net"
 	"net/http"
@@ -111,11 +109,6 @@ func (index *Index) MergeRemote(remote string, trustNew bool) error {
 		//values in remoteIndex.
 	}
 	return nil
-}
-
-//Index.Gob uses encoding/gob to write a binary representation of itself to the specified io.writer. This can be used to pass indexes across Conn objects.
-func (index *Index) Gob(w io.Writer) {
-	gob.NewEncoder(w).Encode(index)
 }
 
 //Index.JSON creates a JSON-encoded (encoding/json) and tab indented string from the parent index.
