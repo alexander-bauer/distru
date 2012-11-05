@@ -22,7 +22,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
 
 	//Perform the search.
-	num, _ := Idx.Search(strings.Split(searchTerm, " "), 10)
+	num, results := Idx.Search(strings.Split(searchTerm, " "), 10)
 
 	log.Println("<-"+r.RemoteAddr+"> results:", num)
 
@@ -37,8 +37,10 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(css)
 	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(num) + " results for <strong>" + searchTerm + "</strong></div>"))
 
-	//TODO: display search results
-	w.Write([]byte("<div class=\"results\">test</div>" + "</body></html>"))
+	for i := range results {
+		w.Write([]byte("<div class=\"results\"><a href=\"" + results[i].Link + "\">test</a></div>"))
+	}
+	w.Write([]byte("</body></html>"))
 }
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
