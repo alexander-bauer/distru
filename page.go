@@ -30,14 +30,19 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Convert to string real quick.
 	body := string(b)
 
+	title := "No Title"
 	titlepattern, err := regexp.Compile("<title>.*</title>")
 	if err != nil {
 		return nil, nil, nil
 	}
 	//Find the leftmost title tag
-	title := titlepattern.Find(b)
-	//and cut out the html tags.
-	title = title[len("<title>") : len(title)-len("</title>")]
+	titleb := titlepattern.Find(b)
+	//and cut out the html tags, if
+	//title is present at all.
+	if titleb != nil {
+		title = string(titleb[len("<title>") : len(titleb)-len("</title>")])
+	}
+	//Otherwise, leave title uninitialized.
 
 	//Now we're going to move on to parsing the links.
 	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
