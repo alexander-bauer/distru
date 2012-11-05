@@ -22,7 +22,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
 
 	//Perform the search.
-	num, results := Idx.Search(strings.Split(searchTerm, " "), 10)
+	num, results := Idx.Search(strings.Split(searchTerm, " "))
 
 	log.Println("<-"+r.RemoteAddr+"> results:", num)
 

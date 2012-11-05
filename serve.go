@@ -108,7 +108,7 @@ func handleConn(conn net.Conn) {
 			}
 			term := string(searchRequest[:len(searchRequest)-2])
 			log.Println(prefix, "searching:", term)
-			num, results := Idx.SearchToJSON([]string{term}, 10)
+			num, results := Idx.SearchToJSON([]string{term})
 			log.Println(prefix, "search results:", num)
 			_, err = w.Write(results)
 			if err != nil {

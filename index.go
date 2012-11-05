@@ -34,7 +34,7 @@ type page struct {
 }
 
 //Index.Search returns the total number of results, and a []*page containing at most maxResults number of results.
-func (index *Index) Search(terms []string, maxResults int) (int, []*page) {
+func (index *Index) Search(terms []string) (int, []*page) {
 	results := make([]*page, 0)
 	for _, v := range index.Sites {
 		for _, vv := range v.Pages {
@@ -50,16 +50,13 @@ func (index *Index) Search(terms []string, maxResults int) (int, []*page) {
 			}
 		}
 	}
-	if len(results) < maxResults {
-		return len(results), results
-	}
-	return len(results), results[:maxResults]
+	return len(results), results
 }
 
 //Index.SearchToJSON wraps Index.Search by using encoding/json to encode the results. It returns the total number of results, 
-func (index *Index) SearchToJSON(terms []string, maxResults int) (int, []byte) {
+func (index *Index) SearchToJSON(terms []string) (int, []byte) {
 	//Use the core Index.Search to build a []*page.
-	num, results := index.Search(terms, maxResults)
+	num, results := index.Search(terms)
 	//Marshal the results into JSON.
 	b, err := json.MarshalIndent(results, "", "\t")
 	if err != nil {
