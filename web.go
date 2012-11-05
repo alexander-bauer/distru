@@ -24,6 +24,8 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//Perform the search.
 	num, _ := Idx.Search(strings.Split(searchTerm, " "), 10)
 
+	log.Println("<-"+r.RemoteAddr+"> results:", num)
+
 	//load external files
 	css, err := ioutil.ReadFile("ui/search.css")
 	if err != nil {
@@ -35,8 +37,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(css)
 	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(num) + " results for <strong>" + searchTerm + "</strong></div>"))
 
-	//TODO: SEARCH HERE.
-	//THIS IS JUST AN EXAMPLE..
+	//TODO: display search results
 	w.Write([]byte("<div class=\"results\">test</div>" + "</body></html>"))
 }
 

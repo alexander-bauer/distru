@@ -49,6 +49,9 @@ func (index *Index) Search(terms []string, maxResults int) (int, []*page) {
 			}
 		}
 	}
+	if len(results) < maxResults {
+		return len(results), results
+	}
 	return len(results), results[:maxResults]
 }
 
