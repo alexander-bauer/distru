@@ -3,7 +3,7 @@
 body {
 	margin: 0;
 	font-size: 12px;
-	background-color: #EEE;
+	background-color: #ADD8E6;
 	font-family: Helvetica;	
 }
 
@@ -11,10 +11,6 @@ a {
 	color: #000;
 	text-decoration: none;
 	font-weight: bold;
-}
-
-a:hover {
-	color: #ADD8E6;
 }
 
 .searchterm {
@@ -39,16 +35,27 @@ a:hover {
 	border: 1px solid #CCC;
 }
 
+.results:hover {
+	color: FFF;
+	background-color: #003;
+}
+
 .description {
-	color: #333;
+	color: #AAA;
+	font-weight: 100;
 }
 
 .url, a.url {
 	color: #CCC;
 	font-style:italic;
 	font-size: 10px;
+	font-weight: 100;
 }
 
-a.url:hover {
-	color: #DDD;
+.version {
+	position: fixed;
+	bottom: 0;
+	right: 0;
+	font-size: 10px;
+	padding: 5px;
 }
