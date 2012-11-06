@@ -20,6 +20,16 @@ const (
 func Serve(conf *config) {
 	log.Println("Distru version", Version)
 	log.Println("Configuration status:\n\tGenerated in:", conf.Version, "\n\tSites indexed:", len(conf.Idx.Sites))
+
+	//Start the Index Maintainer for the index.
+	MaintainIndex(conf.Idx, 1)
+
+	go func() {
+		for i := range conf.AutoIndex {
+			conf.Idx.Queue <- conf.AutoIndex[i]
+		}
+	}()
+
 	ln, err := net.Listen("tcp", ":9049")
 	if err != nil {
 		log.Fatal("Could not start server:", err)
@@ -28,9 +38,6 @@ func Serve(conf *config) {
 
 	//Start a new goroutine for the webserver.
 	go ServeWeb()
-
-	//Start the Index Maintainer for the index.
-	MaintainIndex(conf.Idx, 1)
 
 	for {
 		conn, err := ln.Accept()
