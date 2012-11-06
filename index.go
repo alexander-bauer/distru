@@ -137,6 +137,7 @@ func MaintainIndex(index *Index, numIndexers int) {
 
 func Indexer(index *Index, pending <-chan string) {
 	for target := range pending {
+		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
 		if newSite == nil {
 			//If we got an error for some reason,
