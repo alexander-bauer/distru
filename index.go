@@ -177,20 +177,17 @@ func newSite(target string) *site {
 	//We'll loop until there are no more unresolved pages. Then we'll
 	//set isFinished to true, and break the loop.
 
-	pool := make(chan string, 1) //This chan will contain new paths to index
-	status := make(chan bool, 1) //This chan will be passed true if a pager is beginning to index, and false if it has finished
+	pool := make(chan string, 16) //This chan will contain new paths to index
+	status := make(chan bool, 1)  //This chan will be passed true if a pager is beginning to index, and false if it has finished
+	workchan := make(chan int, 0) //This chan will be used by the worker handler to signal to the main for loop that it has just recieved an update
 
 	//Initialize as many pagers as there are known pages in the index.
 	pagers := 1
-	var working int
 
-	println("Started", pagers, "pagers.")
+	println("Starting", pagers, "pagers.")
 
-	for i := 0; i < pagers; i++ {
-		go pager(pool, status, target, client, rperm, pages, tree, links)
-	}
-
-	go func(working *int, status <-chan bool) {
+	go func(workchan chan<- int, status <-chan bool) {
+		var working int
 		for {
 			update, ok := <-status
 			if !ok {
@@ -202,37 +199,37 @@ func newSite(target string) *site {
 			//If it is false, then the
 			//opposite is true.
 			if update == true {
-				*working += 1
-				println("Working upped by one:", *working)
+				working += 1
+				println("Working upped by one:", working)
 			} else {
-				*working -= 1
-				println("Working downed by one:", *working)
+				working -= 1
+				println("Working downed by one:", working)
 			}
+			workchan <- working
 		}
-	}(&working, status)
+	}(workchan, status)
 
-	for {
-		for k, _ := range tree {
-			_, isPresent := pages[k]
-			if !isPresent {
-				//Block the page, for future passes,
-				pages[k] = nil
-				//and drop the key into the pool.
-				//This will pause this thread until
-				//it's taken out of the pool by a
-				//pager.
-				pool <- k
-			}
-		}
-		if working == 0 {
-			println("--- STOPPING INDEXING ---")
-			//If the tree has been exhausted,
-			//then terminate all the goroutines,
-			//and this for loop.
+	for i := 0; i < pagers; i++ {
+		go pager(pool, status, target, client, rperm, pages, links)
+	}
+
+	for v := range tree {
+		pool <- v
+	}
+
+	for working := range workchan {
+		//If the number of working pagers has just
+		//dropped to zero, and there are no queued
+		//elements,
+		// (Thanks http://stackoverflow.com/questions/13003749)
+		//then we can safely close the pool to
+		//terminate the workers, and the manager.
+		if working == 0 && len(pool) == 0 && len(status) == 0 && len(workchan) == 0 {
+			println("Closing pool, len", len(pool))
 			close(pool)
-			println("Closed pool.")
-			//close(status)
-			break
+			println("Closing manager, len", len(status))
+			close(status)
+			println("Closing workchan, len", len(workchan))
 		}
 	}
 
@@ -249,7 +246,7 @@ func newSite(target string) *site {
 	return site
 }
 
-func pager(pool <-chan string, status chan<- bool, target string, client http.Client, rperm *robotstxt.Group, pages map[string]*page, tree, links map[string]struct{}) {
+func pager(pool chan string, status chan<- bool, target string, client http.Client, rperm *robotstxt.Group, pages map[string]*page, links map[string]struct{}) {
 	for {
 		path, ok := <-pool
 		if !ok {
@@ -260,6 +257,8 @@ func pager(pool <-chan string, status chan<- bool, target string, client http.Cl
 		println("Pager working on:", path)
 		//When we begin, we must signal that.
 		status <- true
+		//Block the page from other indexing.
+		pages[path] = nil
 		if !rperm.Test(path) {
 			//If the page has been indexed already,
 			//or if we're not allowed to access it,
@@ -279,12 +278,16 @@ func pager(pool <-chan string, status chan<- bool, target string, client http.Cl
 		//If we got a good response, then put it in the map.
 		pages[path] = newPage
 
-		//Then we put all of the new values into the old maps,
-		for k, v := range newTree {
-			tree[k] = v
-		}
+		//Then we put the new links into the old map,
 		for k, v := range newLinks {
 			links[k] = v
+		}
+		//and put all of the unindexed parts of the tree into the pool,
+		for k, _ := range newTree {
+			if pages[k] != nil {
+				continue
+			}
+			pool <- k
 		}
 		//and start the loop over again.
 		println("Looping again, finished:", path)
