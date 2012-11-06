@@ -176,15 +176,66 @@ func newSite(target string) *site {
 	//Grab the root page first, then we're going to build on the tree.
 	//We'll loop until there are no more unresolved pages. Then we'll
 	//set isFinished to true, and break the loop.
-	isFinished := false
-	for isFinished == false {
-		//We set isFinished to true here. If we're not actually
-		//finished, the following loop will set it to false.
-		isFinished = true
+
+	pool := make(chan string, 1) //This chan will contain new paths to index
+	status := make(chan bool, 1) //This chan will be passed true if a pager is beginning to index, and false if it has finished
+
+	//Initialize as many pagers as there are known pages in the index.
+	pagers := 1
+	var working int
+
+	println("Started", pagers, "pagers.")
+
+	for i := 0; i < pagers; i++ {
+		go pager(pool, status, target, client, rperm, pages, tree, links)
+	}
+
+	go func(working *int, status <-chan bool) {
+		for {
+			update, ok := <-status
+			if !ok {
+				println("Worker manager stopping.")
+				return
+			}
+			//If update is true, then a
+			//routine has started work.
+			//If it is false, then the
+			//opposite is true.
+			if update == true {
+				*working += 1
+				println("Working upped by one:", *working)
+			} else {
+				*working -= 1
+				println("Working downed by one:", *working)
+			}
+		}
+	}(&working, status)
+
+	for {
 		for k, _ := range tree {
-			go processSitePageRequest(target, k, client, &isFinished, pages, rperm, tree, links)
+			_, isPresent := pages[k]
+			if !isPresent {
+				//Block the page, for future passes,
+				pages[k] = nil
+				//and drop the key into the pool.
+				//This will pause this thread until
+				//it's taken out of the pool by a
+				//pager.
+				pool <- k
+			}
+		}
+		if working == 0 {
+			println("--- STOPPING INDEXING ---")
+			//If the tree has been exhausted,
+			//then terminate all the goroutines,
+			//and this for loop.
+			close(pool)
+			println("Closed pool.")
+			//close(status)
+			break
 		}
 	}
+
 	linkArray := make([]string, 0, len(links))
 	for k, _ := range links {
 		linkArray = append(linkArray, k)
@@ -198,34 +249,47 @@ func newSite(target string) *site {
 	return site
 }
 
-func processSitePageRequest(target, path string, client http.Client, isFinished *bool, pages map[string]*page, rperm *robotstxt.Group, tree, links map[string]struct{}) {
-	if pages[path] != nil || !rperm.Test(path) {
-		//If the page has been indexed already,
-		//or if we're not allowed to access it,
-		//ignore it.
-		return
-	}
-	//Otherwise, set isFinished to false, because we will
-	//need at least one more iteration.
-	*isFinished = false
-	//Then we index the page and grab the new tree.
-	newPage, newTree, newLinks := getPage(target, path, client)
-	if newPage == nil {
-		//If we got a nil response from getPage,
-		//then continue and drop this page
-		return
-	}
-	//If we got a good response, then put it in the map.
-	pages[path] = newPage
+func pager(pool <-chan string, status chan<- bool, target string, client http.Client, rperm *robotstxt.Group, pages map[string]*page, tree, links map[string]struct{}) {
+	for {
+		path, ok := <-pool
+		if !ok {
+			println("--- Pager stopping.")
+			return
+		}
+		println("Channel is OK?", ok)
+		println("Pager working on:", path)
+		//When we begin, we must signal that.
+		status <- true
+		if !rperm.Test(path) {
+			//If the page has been indexed already,
+			//or if we're not allowed to access it,
+			//ignore it.
+			status <- false
+			continue
+		}
+		println("Getting page:", target, path)
+		//Then we index the page and grab the new tree.
+		newPage, newTree, newLinks := getPage(target, path, client)
+		if newPage == nil {
+			//If we got a nil response from getPage,
+			//then continue and drop this page
+			status <- false
+			continue
+		}
+		//If we got a good response, then put it in the map.
+		pages[path] = newPage
 
-	//Then we put all of the new values into the old maps,
-	for k, v := range newTree {
-		tree[k] = v
+		//Then we put all of the new values into the old maps,
+		for k, v := range newTree {
+			tree[k] = v
+		}
+		for k, v := range newLinks {
+			links[k] = v
+		}
+		//and start the loop over again.
+		println("Looping again, finished:", path)
+		status <- false
 	}
-	for k, v := range newLinks {
-		links[k] = v
-	}
-	//and start the loop over again.
 }
 
 func getRobotsPermission(target string) (*robotstxt.Group, error) {
