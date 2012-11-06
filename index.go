@@ -181,17 +181,19 @@ func newSite(target string) *site {
 	status := make(chan bool, 1)  //This chan will be passed true if a pager is beginning to index, and false if it has finished
 	workchan := make(chan int, 0) //This chan will be used by the worker handler to signal to the main for loop that it has just recieved an update
 
-	//Initialize as many pagers as there are known pages in the index.
-	pagers := 1
-
-	println("Starting", pagers, "pagers.")
+	//Initialize some number of pagers
+	var pagers int
+	if len(tree) < 16 {
+		pagers = len(tree)
+	} else {
+		pagers = 16
+	}
 
 	go func(workchan chan<- int, status <-chan bool) {
 		var working int
 		for {
 			update, ok := <-status
 			if !ok {
-				println("Worker manager stopping.")
 				return
 			}
 			//If update is true, then a
@@ -200,10 +202,8 @@ func newSite(target string) *site {
 			//opposite is true.
 			if update == true {
 				working += 1
-				println("Working upped by one:", working)
 			} else {
 				working -= 1
-				println("Working downed by one:", working)
 			}
 			workchan <- working
 		}
@@ -225,11 +225,17 @@ func newSite(target string) *site {
 		//then we can safely close the pool to
 		//terminate the workers, and the manager.
 		if working == 0 && len(pool) == 0 && len(status) == 0 && len(workchan) == 0 {
-			println("Closing pool, len", len(pool))
 			close(pool)
-			println("Closing manager, len", len(status))
 			close(status)
-			println("Closing workchan, len", len(workchan))
+			close(workchan)
+			break
+		}
+		//If the pool buffer is full, we start
+		//16 more pagers.
+		if len(pool) == cap(pool) {
+			for i := 0; i < 16; i++ {
+				go pager(pool, status, target, client, rperm, pages, links)
+			}
 		}
 	}
 
@@ -250,11 +256,8 @@ func pager(pool chan string, status chan<- bool, target string, client http.Clie
 	for {
 		path, ok := <-pool
 		if !ok {
-			println("--- Pager stopping.")
 			return
 		}
-		println("Channel is OK?", ok)
-		println("Pager working on:", path)
 		//When we begin, we must signal that.
 		status <- true
 		//Block the page from other indexing.
@@ -266,7 +269,6 @@ func pager(pool chan string, status chan<- bool, target string, client http.Clie
 			status <- false
 			continue
 		}
-		println("Getting page:", target, path)
 		//Then we index the page and grab the new tree.
 		newPage, newTree, newLinks := getPage(target, path, client)
 		if newPage == nil {
@@ -290,7 +292,6 @@ func pager(pool chan string, status chan<- bool, target string, client http.Clie
 			pool <- k
 		}
 		//and start the loop over again.
-		println("Looping again, finished:", path)
 		status <- false
 	}
 }

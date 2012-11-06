@@ -20,7 +20,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 
 	//Get the content of the webpage via HTTP, using the
 	//existing http.Client, and return blank if it fails.
-	resp, err := http.Get(accessURI.String())
+	resp, err := client.Get(accessURI.String())
 	if err != nil {
 		return nil, nil, nil
 	}
