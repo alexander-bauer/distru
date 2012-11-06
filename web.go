@@ -38,7 +38,13 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(num) + " results for <strong>" + searchTerm + "</strong></div>"))
 
 	for i := range results {
-		w.Write([]byte("<a href=\"" + results[i].Link + "\"><div class=\"results\">" + results[i].Title + "<br/><div class =\"description\">Description</div><div class=\"url\">www.example.com</div></div></a>"))
+		//get url and remove the http://
+		url := results[i].Link[len("http://"):]
+		//if the url has a "/" at the end, remove it
+		if strings.HasSuffix(url, "/") {
+			url = url[:len(url)-1]
+		}
+		w.Write([]byte("<a href=\"" + results[i].Link + "\"><div class=\"results\">" + results[i].Title + "<br/><div class =\"description\">Description</div><div class=\"url\">"+url+"</div></div></a>"))
 	}
 	w.Write([]byte("</body></html>"))
 }
