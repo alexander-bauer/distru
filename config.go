@@ -6,8 +6,9 @@ import (
 )
 
 type config struct {
-	Version string //The Distru version that generated this config.
-	Idx     *Index `json:",omitempty"` //The local index
+	Version   string   //The Distru version that generated this config
+	AutoIndex []string //A list of sites to index on startup
+	Idx       *Index   `json:",omitempty"` //The local index
 }
 
 func (conf *config) save(filename string) error {
