@@ -267,6 +267,7 @@ func pager(pool chan string, status chan<- bool, target string, client http.Clie
 			//If the page has been indexed already,
 			//or if we're not allowed to access it,
 			//ignore it.
+			delete(pages, path)
 			status <- false
 			continue
 		}
@@ -275,6 +276,7 @@ func pager(pool chan string, status chan<- bool, target string, client http.Clie
 		if newPage == nil {
 			//If we got a nil response from getPage,
 			//then continue and drop this page
+			delete(pages, path)
 			status <- false
 			continue
 		}
