@@ -1,7 +1,7 @@
 package main
 
 const (
-	Version  = "0.7"
+	Version  = "0.7.1"
 	ConfPath = "/etc/distru.conf"
 )
 
