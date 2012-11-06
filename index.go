@@ -182,33 +182,7 @@ func newSite(target string) *site {
 		//finished, the following loop will set it to false.
 		isFinished = true
 		for k, _ := range tree {
-			if pages[k] != nil || !rperm.Test(k) {
-				//If the page has been indexed already,
-				//or if we're not allowed to access it,
-				//ignore it.
-				continue
-			}
-			//Otherwise, set isFinished to false, because we will
-			//need at least one more iteration.
-			isFinished = false
-			//Then we index the page and grab the new tree.
-			newPage, newTree, newLinks := getPage(target, k, client)
-			if newPage == nil {
-				//If we got a nil response from getPage,
-				//then continue and drop this page
-				continue
-			}
-			//If we got a good response, then put it in the map.
-			pages[k] = newPage
-
-			//Then we put all of the new values into the old maps,
-			for kk, vv := range newTree {
-				tree[kk] = vv
-			}
-			for kk, vv := range newLinks {
-				links[kk] = vv
-			}
-			//and start the loop over again.
+			go processSitePageRequest(target, k, client, &isFinished, pages, rperm, tree, links)
 		}
 	}
 	linkArray := make([]string, 0, len(links))
@@ -222,6 +196,36 @@ func newSite(target string) *site {
 		Links: linkArray,
 	}
 	return site
+}
+
+func processSitePageRequest(target, path string, client http.Client, isFinished *bool, pages map[string]*page, rperm *robotstxt.Group, tree, links map[string]struct{}) {
+	if pages[path] != nil || !rperm.Test(path) {
+		//If the page has been indexed already,
+		//or if we're not allowed to access it,
+		//ignore it.
+		return
+	}
+	//Otherwise, set isFinished to false, because we will
+	//need at least one more iteration.
+	*isFinished = false
+	//Then we index the page and grab the new tree.
+	newPage, newTree, newLinks := getPage(target, path, client)
+	if newPage == nil {
+		//If we got a nil response from getPage,
+		//then continue and drop this page
+		return
+	}
+	//If we got a good response, then put it in the map.
+	pages[path] = newPage
+
+	//Then we put all of the new values into the old maps,
+	for k, v := range newTree {
+		tree[k] = v
+	}
+	for k, v := range newLinks {
+		links[k] = v
+	}
+	//and start the loop over again.
 }
 
 func getRobotsPermission(target string) (*robotstxt.Group, error) {
