@@ -30,7 +30,9 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Convert to string real quick.
 	body := string(b)
 
-	title := "No Title"
+	//if there is no title, show the name of the url
+	title := target
+	title = title[len("http://"):]
 	titlepattern, err := regexp.Compile("<title>.*</title>")
 	if err != nil {
 		return nil, nil, nil
@@ -42,7 +44,6 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	if titleb != nil {
 		title = string(titleb[len("<title>") : len(titleb)-len("</title>")])
 	}
-	//Otherwise, leave title uninitialized.
 
 	//Now we're going to move on to parsing the links.
 	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
