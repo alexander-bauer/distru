@@ -44,7 +44,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(url, "/") {
 			url = url[:len(url)-1]
 		}
-		w.Write([]byte("<a href=\"" + results[i].Link + "\"><div class=\"results\">" + results[i].Title + "<br/><div class =\"description\">Description</div><div class=\"url\">"+url+"</div></div></a>"))
+		w.Write([]byte("<a href=\"" + results[i].Link + "\"><div class=\"results\">" + results[i].Title + "<br/><div class =\"description\">Description</div><div class=\"url\">" + url + "</div></div></a>"))
 	}
 	w.Write([]byte("</body></html>"))
 }
