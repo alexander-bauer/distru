@@ -43,10 +43,6 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 		title = string(titleb[len("<title>") : len(titleb)-len("</title>")])
 	}
 
-	//uh this doesn't work, DUONOXSOL TAKE A LOOK AT THIS
-	sentence := regexp.MustCompile("[a-zA-Z0-9 _,].")
-	descriptionb := sentence.Find(b)
-
 	//Now we're going to move on to parsing the links.
 	pattern := regexp.MustCompile("href=['\"]?([^'\" >]+)")
 
@@ -85,11 +81,19 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//the wordlist should be added here, but that function doesn't exist yet
 	//TODO
 
-	//only lowercase letters!
+	//Remove all html tags.
+	phtml := regexp.MustCompile("<([^>]*)>")
+	b = phtml.ReplaceAll(b, []byte(""))
+
+	//Grab the first sentence that remains.
+	sentence := regexp.MustCompilePOSIX(".+[\\.\\!\\?] ")
+	descriptionb := sentence.Find(b)
+
+	//Set all letters to lowercase.
 	b = bytes.ToLower(b)
 
 	//Compile the pattern for stripping HTML
-	p := regexp.MustCompile("<([^>]*)>|\n|\t|&[a-z]+|[.,]+ |;|\u0009")
+	p := regexp.MustCompile("\n|\t|&[a-z]+|[.,]+ |;|\u0009")
 
 	//Apply the pattern and split on spaces.
 	content := bytes.Split(p.ReplaceAll(b, []byte("")), []byte(" "))
