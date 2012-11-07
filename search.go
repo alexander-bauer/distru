@@ -1,6 +1,8 @@
 package main
 
-import ()
+import (
+	"time"
+)
 
 //Conf.Search returns the total number of results, and a []*page containing at most maxResults number of results.
 func (conf *config) Search(terms []string) []*page {
@@ -22,10 +24,14 @@ func (conf *config) Search(terms []string) []*page {
 			for i := range terms {
 				_, isPresent := vv.WordCount[terms[i]]
 				if isPresent {
+					vv.Time = time.Now()
 					bareresults = append(bareresults, vv)
 				}
 			}
 		}
 	}
+	//bareresults should be further refined, not to mention sorted, to improve the final search results.
+
+	conf.Idx.Cache = append(conf.Idx.Cache, bareresults...)
 	return bareresults
 }

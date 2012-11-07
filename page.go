@@ -8,6 +8,7 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"time"
 )
 
 //getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, without duplicates, as a map[string]struct{}. All unique external links on the page are returned in the second map[string]struct{}.
@@ -122,9 +123,10 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 
 	return &page{
 		Title:       string(title),
+		Description: string(descriptionb),
+		Time:        time.Now(),
 		Link:        target + path,
 		WordCount:   wc,
-		Description: string(descriptionb),
 	}, internalLinks, externalLinks
 }
 
