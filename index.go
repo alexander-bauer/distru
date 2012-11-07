@@ -16,7 +16,7 @@ const (
 
 type Index struct {
 	Sites map[string]*site //A map of fully indexed webpages.
-	Queue chan string      `json:"-"` //The channel which controls Indexers
+	Queue chan string `json:"-"` //The channel which controls Indexers
 }
 
 type site struct {
@@ -26,9 +26,10 @@ type site struct {
 }
 
 type page struct {
-	Title     string         //The contents of the <title> tag
-	Link      string         //The fully qualified link to this page
-	WordCount map[string]int //Counts for every plaintext word on the webpage
+	Title       string         //The contents of the <title> tag
+	Link        string         //The fully qualified link to this page
+	WordCount   map[string]int //Counts for every plaintext word on the webpage
+	Description string         //The description of the page
 }
 
 //Index.Search returns the total number of results, and a []*page containing at most maxResults number of results.
