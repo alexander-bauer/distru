@@ -7,6 +7,7 @@ import (
 
 type config struct {
 	Version   string   //The Distru version that generated this config
+	Indexers  int      //The number of indexer processes that should be run
 	AutoIndex []string //A list of sites to index on startup
 	Idx       *Index   `json:",omitempty"` //The local index
 }
