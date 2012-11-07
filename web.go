@@ -35,7 +35,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching " + searchTerm + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <strong>" + searchTerm + "</strong></div>"))
+	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <strong>" + searchTerm + "</strong></div></div>"))
 
 	for i := range results {
 		//get url and remove the http://
@@ -44,7 +44,9 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(url, "/") {
 			url = url[:len(url)-1]
 		}
-		w.Write([]byte("<a href=\"" + results[i].Link + "\"><div class=\"results\">" + results[i].Title + "<br/><div class =\"description\">" + results[i].Description + "</div><div class=\"url\">" + url + "</div></div></a>"))
+		
+	w.Write([]byte("<div class =\"holder\"><a href=\"" + results[i].Link + "\"><div class=\"results\">" + results[i].Title + "<div class =\"description\">" + results[i].Description + "</div><div class=\"url\">" + url + "</div></div></a></div>"))
+
 	}
 	w.Write([]byte("</body></html>"))
 }
