@@ -7,11 +7,10 @@ import (
 )
 
 const (
-	GETJSON = "distru json\r\n"   //Requests a json-encoded current index.
-	NEWSITE = "distru index\r\n"  //Prefaces a request to index a new site.
-	SEARCH  = "distru search\r\n" //Performs a search request.
-	SHARE   = "distru share\r\n"  //Wraps Idx.MergeRemote()
-	SAVE    = "distru save\r\n"   //Saves the current configuration and index
+	GETJSON = "distru json\r\n"  //Requests a json-encoded current index.
+	NEWSITE = "distru index\r\n" //Prefaces a request to index a new site.
+	SHARE   = "distru share\r\n" //Wraps Idx.MergeRemote()
+	SAVE    = "distru save\r\n"  //Saves the current configuration and index
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
@@ -97,25 +96,6 @@ func handleConn(conf *config, conn net.Conn) {
 			conn.Close()
 			conf.Idx.Queue <- site
 		} //close case
-	case SEARCH:
-		{
-			searchRequest, err := r.ReadBytes('\n')
-			if err != nil {
-				log.Println(prefix, err)
-				return
-			}
-			term := string(searchRequest[:len(searchRequest)-2])
-			log.Println(prefix, "searching:", term)
-			num, results := conf.Idx.SearchToJSON([]string{term})
-			log.Println(prefix, "search results:", num)
-			_, err = w.Write(results)
-			if err != nil {
-				log.Println(prefix, err)
-				return
-			}
-			w.Flush()
-			conn.Close()
-		}
 	case SHARE:
 		{
 			shareRequest, err := r.ReadBytes('\n')
