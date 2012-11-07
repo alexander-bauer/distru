@@ -104,7 +104,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	p := regexp.MustCompile("\n|\t|&[a-z]+|[.,]+ |;|\u0009")
 
 	//Apply the pattern and split on spaces.
-	content := bytes.Split(p.ReplaceAll(b, []byte("")), []byte(" "))
+	content := bytes.Split(p.ReplaceAll(b, []byte(" ")), []byte(" "))
 	wc := make(map[string]int)
 
 	//For every word...
