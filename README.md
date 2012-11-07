@@ -22,18 +22,18 @@ When a site's tree of content is known, and all of the hyperlinks from those pag
 ### Install Go
 Distru is written in Go, which is terribly easy to compile.
 
-#####Linux (Debian)
+##### Linux (Debian)
 ```bash
 sudo apt-get install golang
 ```
-#####Mac OS X
+##### Mac OS X
 If you don't already have Homebrew installed, view [this](http://mxcl.github.com/homebrew/) and install it.
 ```bash
 brew install go
 ```
 If you don't want to install Homebrew, you can visit [Go's website](http://golang.org/) to download and install it.
 
-###Get Files
+### Get Files
 
 As Distru nears a more-finished state, binaries will be available for download, of course. Until then, it can be downloaded and executed as follows.
 
@@ -44,3 +44,5 @@ go build
 ```
 
 (*If you do not have a GitHub account, you may need to use* `https://github.com/SashaCrofter/distru.git` *instead.*) After using `go build`, the file `distru` will be executable and in the current directory. In the future, you may allow it to make an index, or run certain commands, but currently you can only scrape webpages for URLs. 
+
+If you are going to develop Distru, please consider getting the [version-upping script](https://gist.github.com/4028865). This is primarily intended for major contributors to the repository, because of the confusion involved in merging versions and tags.

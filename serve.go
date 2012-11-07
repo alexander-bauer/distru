@@ -22,7 +22,7 @@ func Serve(conf *config) {
 	log.Println("Configuration status:\n\tGenerated in:", conf.Version, "\n\tSites indexed:", len(conf.Idx.Sites))
 
 	//Start the Index Maintainer for the index.
-	MaintainIndex(conf.Idx, 1)
+	MaintainIndex(conf.Idx, conf.Indexers)
 
 	go func() {
 		for i := range conf.AutoIndex {
