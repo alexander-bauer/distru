@@ -18,7 +18,7 @@ const (
 //Serve is the primary function of distru. It listens on the tcp port 9049 for incoming connections, then passes them directly to handleConn.
 func Serve(conf *config) {
 	log.Println("Distru version", Version)
-	log.Println("Configuration status:\n\tGenerated in:", conf.Version, "\n\tSites indexed:", len(conf.Idx.Sites))
+	log.Println("Configuration status:\n\tGenerated in:\t", conf.Version, "\n\tAutoIndexing:\t", len(conf.AutoIndex), "\n\tResouces:\t", len(conf.Resources), "\n\tSites indexed:\t", len(conf.Idx.Sites))
 
 	//Start the Index Maintainer for the index.
 	MaintainIndex(conf.Idx, conf.Indexers)
