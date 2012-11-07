@@ -35,7 +35,7 @@ type page struct {
 //Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
 func (index *Index) MergeRemote(remote string, trustNew bool) error {
 	//Dial the connection here.
-	conn, err := net.Dial("tcp", remote+":9049")
+	conn, err := net.DialTimeout("tcp", remote+":9049", time.Second*4)
 	if err != nil {
 		return err
 	}
