@@ -37,6 +37,14 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	if err != nil {
 		return nil, nil, nil
 	}
+	
+	//uh this doesn't work, DUONOXSOL TAKE A LOOK AT THIS
+	sentence, err := regexp.Compile("[a-zA-Z0-9 _,].")
+	if err != nil {
+		return nil, nil, nil
+	}
+	description := string(sentence.Find(b))
+	
 	//Find the leftmost title tag
 	titleb := titlepattern.Find(b)
 	//and cut out the html tags, if
@@ -112,9 +120,10 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	}
 
 	return &page{
-		Title:     string(title),
-		Link:      target + path,
-		WordCount: wc,
+		Title:       string(title),
+		Link:        target + path,
+		WordCount:   wc,
+		Description: description,
 	}, internalLinks, externalLinks
 }
 
