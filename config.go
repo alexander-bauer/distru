@@ -9,6 +9,7 @@ type config struct {
 	Version   string   //The Distru version that generated this config
 	Indexers  int      //The number of indexer processes that should be run
 	AutoIndex []string //A list of sites to index on startup
+	Resources []string //A list of sites from which to request trusted indexes
 	Idx       *Index   `json:",omitempty"` //The local index
 }
 

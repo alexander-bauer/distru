@@ -22,9 +22,9 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
 
 	//Perform the search.
-	num, results := Conf.Idx.Search(strings.Split(searchTerm, " "))
+	results := Conf.Search(strings.Split(searchTerm, " "))
 
-	log.Println("<-"+r.RemoteAddr+"> results:", num)
+	log.Println("<-"+r.RemoteAddr+"> results:", len(results))
 
 	//load external files
 	css, err := ioutil.ReadFile("ui/search.css")
@@ -35,7 +35,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching " + searchTerm + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(num) + " results for <strong>" + searchTerm + "</strong></div>"))
+	w.Write([]byte("</style></head><body><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <strong>" + searchTerm + "</strong></div>"))
 
 	for i := range results {
 		//get url and remove the http://
