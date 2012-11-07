@@ -9,7 +9,7 @@ func (conf *config) Search(terms []string) []*page {
 	//Request indexes from all resources,
 	//and trust their results.
 	for i := range conf.Resources {
-		index.MergeRemote(conf.Resources[i], true)
+		index.MergeRemote(conf.Resources[i], true, conf.ResTimeout)
 	}
 
 	bareresults := make([]*page, 0)

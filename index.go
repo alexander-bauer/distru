@@ -32,12 +32,17 @@ type page struct {
 	Description string         //The description of the page
 }
 
-//Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
-func (index *Index) MergeRemote(remote string, trustNew bool) error {
+//Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. Additionally, it will time out the connection, and not modify the Index, after the number of seconds given in timeout. (0 will cause it to use net.Dial() normally.) It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
+func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err error) {
 	//Dial the connection here.
-	conn, err := net.DialTimeout("tcp", remote+":9049", time.Second*4)
-	if err != nil {
-		return err
+	var conn net.Conn
+	if timeout == 0 {
+		conn, err = net.Dial("tcp", remote+":9049")
+		if err != nil {
+			return
+		}
+	} else {
+		conn, err = net.DialTimeout("tcp", remote+":9049", time.Duration(4)*time.Second)
 	}
 	defer conn.Close()
 
@@ -45,12 +50,12 @@ func (index *Index) MergeRemote(remote string, trustNew bool) error {
 	r, w := bufio.NewReader(conn), bufio.NewWriter(conn)
 	_, err = w.WriteString(GETJSON) //Request the JSON-encoded index.
 	if err != nil {
-		return err
+		return
 	}
 
 	err = w.Flush() //Flush the writer to the connection.
 	if err != nil {
-		return err
+		return
 	}
 
 	//Create a new decoder for reading the JSON
@@ -62,7 +67,7 @@ func (index *Index) MergeRemote(remote string, trustNew bool) error {
 	//Decode into the remoteIndex object.
 	err = dec.Decode(&remoteIndex)
 	if err != nil {
-		return err
+		return
 	}
 
 	isPresent := false

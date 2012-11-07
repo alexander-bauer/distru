@@ -106,7 +106,7 @@ func handleConn(conf *config, conn net.Conn) {
 			conn.Close()
 			remote := string(shareRequest[:len(shareRequest)-2])
 			log.Println(prefix, "merging index from:", remote)
-			err = conf.Idx.MergeRemote(remote, true)
+			err = conf.Idx.MergeRemote(remote, true, 0)
 			if err != nil {
 				log.Println(prefix, err)
 			} else {
