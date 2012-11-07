@@ -18,9 +18,17 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 		return nil, nil, nil
 	}
 
+	req, err := http.NewRequest("GET", accessURI.String(), nil)
+	if err != nil {
+		return nil, nil, nil
+	}
+
+	req.Header.Set("User-Agent", BotName)
+	req.Header.Set("Accept", "text/html")
+
 	//Get the content of the webpage via HTTP, using the
 	//existing http.Client, and return blank if it fails.
-	resp, err := client.Get(accessURI.String())
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, nil, nil
 	}
