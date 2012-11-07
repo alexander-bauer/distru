@@ -33,18 +33,8 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//if there is no title, show the name of the url
 	title := target
 	title = title[len("http://"):]
-	titlepattern, err := regexp.Compile("<title>.*</title>")
-	if err != nil {
-		return nil, nil, nil
-	}
-	
-	//uh this doesn't work, DUONOXSOL TAKE A LOOK AT THIS
-	sentence, err := regexp.Compile("[a-zA-Z0-9 _,].")
-	if err != nil {
-		return nil, nil, nil
-	}
-	description := string(sentence.Find(b))
-	
+	titlepattern := regexp.MustCompile("<title>.*</title>")
+
 	//Find the leftmost title tag
 	titleb := titlepattern.Find(b)
 	//and cut out the html tags, if
@@ -53,11 +43,12 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 		title = string(titleb[len("<title>") : len(titleb)-len("</title>")])
 	}
 
+	//uh this doesn't work, DUONOXSOL TAKE A LOOK AT THIS
+	sentence := regexp.MustCompile("[a-zA-Z0-9 _,].")
+	descriptionb := sentence.Find(b)
+
 	//Now we're going to move on to parsing the links.
-	pattern, err := regexp.Compile("href=['\"]?([^'\" >]+)")
-	if err != nil {
-		return nil, nil, nil
-	}
+	pattern := regexp.MustCompile("href=['\"]?([^'\" >]+)")
 
 	//Use pattern matching to find all link tags on the page,
 	//and put them in array.
@@ -98,10 +89,8 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	b = bytes.ToLower(b)
 
 	//Compile the pattern for stripping HTML
-	p, err := regexp.Compile("<([^>]*)>|\n|\t|&[a-z]+|[.,]+ |;|\u0009")
-	if err != nil {
-		return nil, nil, nil
-	}
+	p := regexp.MustCompile("<([^>]*)>|\n|\t|&[a-z]+|[.,]+ |;|\u0009")
+
 	//Apply the pattern and split on spaces.
 	content := bytes.Split(p.ReplaceAll(b, []byte("")), []byte(" "))
 	wc := make(map[string]int)
@@ -123,7 +112,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 		Title:       string(title),
 		Link:        target + path,
 		WordCount:   wc,
-		Description: description,
+		Description: string(descriptionb),
 	}, internalLinks, externalLinks
 }
 
