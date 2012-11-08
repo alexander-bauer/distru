@@ -77,8 +77,8 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 		//If the site in the local index is not present, or if
 		//the remote index is trusted, *and* newer than the
 		//local one, add the remote site to the local index.
-		_, isPresent = index.Sites[k]
-		if !isPresent || (trustNew && index.Sites[k].Time.Before(v.Time)) {
+		local, isPresent := index.Sites[k]
+		if !isPresent || (trustNew && local.Time.Before(v.Time)) {
 			index.Sites[k] = v
 		}
 		//Repeat until we've gone through all of the
