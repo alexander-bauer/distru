@@ -16,7 +16,7 @@ const (
 
 type Index struct {
 	Sites map[string]*site //A map of fully indexed webpages.
-	Cache []*page          //Pages that recently turned up in the search results
+	Cache map[string]*page //Pages that recently turned up in the search results
 	Queue chan string      `json:"-"` //The channel which controls Indexers
 }
 

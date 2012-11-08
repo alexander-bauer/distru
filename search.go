@@ -15,8 +15,8 @@ func (conf *config) Search(terms []string) []*page {
 	}
 
 	bareresults := make([]*page, 0)
-	for _, v := range conf.Idx.Sites {
-		for _, vv := range v.Pages {
+	for k, v := range conf.Idx.Sites {
+		for kk, vv := range v.Pages {
 			//For each term, we get the number and presence
 			//of the word for a particular page. The number
 			//is currently discarded, because we can't rank
@@ -25,13 +25,21 @@ func (conf *config) Search(terms []string) []*page {
 				_, isPresent := vv.WordCount[terms[i]]
 				if isPresent {
 					vv.Time = time.Now()
-					bareresults = append(bareresults, vv)
+					bareresults[k+kk] = vv
 				}
 			}
 		}
 	}
-	//bareresults should be further refined, not to mention sorted, to improve the final search results.
+	//The results should be sorted and refined before being returned, to improve the final search results.
 
-	conf.Idx.Cache = append(conf.Idx.Cache, bareresults...)
-	return bareresults
+	results := make([]*page, len(bareresults))
+	for k, v := range bareresults {
+		//Cache the results, but do not overwrite old results.
+		_, isPresent := conf.Idx.Cache[k]
+		if !isPresent {
+			conf.Idx.Cache[k] = v
+		}
+		results = append(results, v)
+	}
+	return results
 }
