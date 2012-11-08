@@ -5,6 +5,12 @@ import (
 	"io/ioutil"
 )
 
+const (
+	//Default values for the config type
+	DIndexers   = 1
+	DResTimeout = 8
+)
+
 type config struct {
 	Version    string   //The Distru version that generated this config
 	Indexers   int      //The number of indexer processes that should be run
@@ -39,9 +45,14 @@ func GetConfig(filename string) *config {
 	conf, err := loadConf(filename)
 	if err != nil {
 		conf = &config{
-			Version: Version,
+			Version:    Version,
+			Indexers:   DIndexers,
+			AutoIndex:  make([]string, 0),
+			Resources:  make([]string, 0),
+			ResTimeout: DResTimeout,
 			Idx: &Index{
 				Sites: make(map[string]*site),
+				Cache: make(map[string]*page),
 			},
 		}
 	}

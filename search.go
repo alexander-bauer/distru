@@ -29,7 +29,7 @@ func (conf *config) Search(terms []string) []*page {
 			}
 		}
 	}
-	for k, v := range conf.Idx.Sites {
+	for k, v := range index.Sites {
 		for kk, vv := range v.Pages {
 			//For each term, we get the number and presence
 			//of the word for a particular page. The number
