@@ -14,7 +14,21 @@ func (conf *config) Search(terms []string) []*page {
 		index.MergeRemote(conf.Resources[i], true, conf.ResTimeout)
 	}
 
-	bareresults := make([]*page, 0)
+	bareresults := make(map[string]*page, 0)
+	for k, v := range conf.Idx.Cache {
+		//For each page in the cache, we'll
+		//check for the exact presence of each
+		//search term.
+		for i := range terms {
+			_, isPresent := v.WordCount[terms[i]]
+			if isPresent {
+				//Refresh the timestamp on this page,
+				//because it matched the search.
+				v.Time = time.Now()
+				bareresults[k] = v
+			}
+		}
+	}
 	for k, v := range conf.Idx.Sites {
 		for kk, vv := range v.Pages {
 			//For each term, we get the number and presence
@@ -24,6 +38,9 @@ func (conf *config) Search(terms []string) []*page {
 			for i := range terms {
 				_, isPresent := vv.WordCount[terms[i]]
 				if isPresent {
+					//Stamp the result with the
+					//current time, for when it
+					//is included in the chache.
 					vv.Time = time.Now()
 					bareresults[k+kk] = vv
 				}
