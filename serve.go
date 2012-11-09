@@ -1,16 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"log"
 	"net"
-)
-
-const (
-	GETJSON = "distru json\r\n"  //Requests a json-encoded current index.
-	NEWSITE = "distru index\r\n" //Prefaces a request to index a new site.
-	SHARE   = "distru share\r\n" //Wraps Idx.MergeRemote()
-	SAVE    = "distru save\r\n"  //Saves the current configuration and index
 )
 
 //The root dir should actually be a search page, which serves up a page to enter a search query, which is then turned into a search results page
@@ -18,7 +10,11 @@ const (
 //Serve is the primary function of distru. It listens on the tcp port 9049 for incoming connections, then passes them directly to handleConn.
 func Serve(conf *config) {
 	log.Println("Distru version", Version)
-	log.Println("Configuration status:\n\tGenerated in:\t", conf.Version, "\n\tAutoIndexing:\t", len(conf.AutoIndex), "\n\tResouces:\t", len(conf.Resources), "\n\tSites indexed:\t", len(conf.Idx.Sites))
+	log.Println("Configuration status:\n\tGenerated in:\t", conf.Version,
+		"\n\tIndexers:\t", conf.Indexers,
+		"\n\tAutoIndexing:\t", len(conf.AutoIndex),
+		"\n\tResouces:\t", len(conf.Resources),
+		"\n\tSites indexed:\t", len(conf.Idx.Sites))
 
 	//Start the Index Maintainer for the index.
 	MaintainIndex(conf.Idx, conf.Indexers)
