@@ -16,13 +16,11 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {
-		println("problem 0")
 		return nil, nil, nil
 	}
 
 	req, err := http.NewRequest("GET", accessURI.String(), nil)
 	if err != nil {
-		println("problem 1")
 		return nil, nil, nil
 	}
 
@@ -33,7 +31,6 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	//existing http.Client, and return blank if it fails.
 	resp, err := client.Do(req)
 	if err != nil {
-		println("problem 2")
 		return nil, nil, nil
 	}
 	defer resp.Body.Close()
