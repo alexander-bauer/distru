@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"github.com/temoto/robotstxt.go"
+	"io"
 	"log"
 	"net"
 	"net/http"
@@ -48,25 +49,21 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 	}
 	defer conn.Close()
 
-	//Initialize a new reader and writer.
-	r, w := bufio.NewReader(conn), bufio.NewWriter(conn)
-	_, err = w.WriteString(GETJSON) //Request the JSON-encoded index.
-	if err != nil {
-		return
-	}
-
-	err = w.Flush() //Flush the writer to the connection.
-	if err != nil {
-		return
-	}
+	//Initialize a new reader.
+	r := bufio.NewReader(conn)
 
 	//Create a new decoder for reading the JSON
 	//directly off the wire.
 	dec := json.NewDecoder(r)
 
+	//Create a place for the decoder to decode
+	//into.
 	var remoteIndex Index
 
-	//Decode into the remoteIndex object.
+	//Upon initializing the connection, the
+	//remote will immediately serve its JSON
+	//index. We will decode into the
+	//remoteIndex object.
 	err = dec.Decode(&remoteIndex)
 	if err != nil {
 		return
@@ -87,16 +84,11 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 	return nil
 }
 
-//Index.JSON creates a JSON-encoded (encoding/json) and tab indented string from the parent index.
-func (index *Index) JSON() string {
-	//We're going to marshal the parent index here with tab indentation
-	b, err := json.MarshalIndent(index, "", "\t")
-	if err != nil {
-		return "" //return a blank string if there's an error
-	}
-
-	//Then return the []byte as converted to a string.
-	return string(b)
+//Index.JSON writes a JSON-encoded (encoding/json) stream to the provided io.Writer. (This can be a Conn object.)
+func (index *Index) JSON(w io.Writer) error {
+	//Create an encoder for the io.Writer.
+	enc := json.NewEncoder(w)
+	return enc.Encode(index)
 }
 
 //MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It sets index.Queue to a channel into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
