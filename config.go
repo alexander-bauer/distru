@@ -55,6 +55,7 @@ func GetConfig(filename string) *config {
 				Cache: make(map[string]*page),
 			},
 		}
+		conf.save(filename)
 	}
 	return conf
 }
