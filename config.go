@@ -39,11 +39,17 @@ func GetConfig(filename string) *config {
 	conf, err := loadConf(filename)
 	if err != nil {
 		conf = &config{
-			Version: Version,
+			Version:    Version,
+			Indexers:   1,
+			AutoIndex:  make([]string, 0),
+			Resources:  make([]string, 0),
+			ResTimeout: 8,
 			Idx: &Index{
 				Sites: make(map[string]*site),
+				Cache: make([]*page, 0),
 			},
 		}
+		conf.save(filename)
 	}
 	return conf
 }
