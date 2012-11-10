@@ -49,7 +49,7 @@ func (conf *config) Search(terms []string) []*page {
 	}
 	//The results should be sorted and refined before being returned, to improve the final search results.
 
-	results := make([]*page, len(bareresults))
+	results := make([]*page, 0, len(bareresults))
 	for k, v := range bareresults {
 		//Cache the results, but do not overwrite old results.
 		_, isPresent := conf.Idx.Cache[k]
@@ -58,5 +58,6 @@ func (conf *config) Search(terms []string) []*page {
 		}
 		results = append(results, v)
 	}
+
 	return results
 }
