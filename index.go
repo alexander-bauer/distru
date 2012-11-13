@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/temoto/robotstxt.go"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -97,17 +98,17 @@ func (index *Index) JSON(w io.Writer) error {
 
 //MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It sets index.Queue to a channel into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
 //To remove a site from the index, use delete(index.Sites, urlstring). To shut down the indexers, close() index.Queue.
-func MaintainIndex(index *Index, numIndexers int) {
+func MaintainIndex(index *Index, numIndexers int, filename string) {
 	//First, we're going to make the channel of pending sites.
 	index.Queue = make(chan string)
 
 	//Next, we're going to launch numIndexers amount of Indexers.
 	for i := 0; i < numIndexers; i++ {
-		go Indexer(index, index.Queue)
+		go Indexer(index, index.Queue, filename)
 	}
 }
 
-func Indexer(index *Index, pending <-chan string) {
+func Indexer(index *Index, pending <-chan string, filename string) {
 	for target := range pending {
 		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
@@ -120,7 +121,36 @@ func Indexer(index *Index, pending <-chan string) {
 		//Update the target site.
 		index.Sites[target] = newSite
 		log.Println("indexer> added \"" + target + "\"")
+		err := index.save(filename)
+		if err != nil {
+			log.Println("indexer> error saving:", err)
+		} else {
+			log.Println("indexer> saved index to \"" + filename + "\"")
+		}
 	}
+}
+
+//Index.save writes the JSON-encoded Index to the disk.
+func (index *Index) save(filename string) error {
+	b, err := json.Marshal(index)
+	if err != nil {
+		return err
+	}
+	return ioutil.WriteFile(filename, b, 0655)
+}
+
+//LoadIndex tries to read an index from a saved file, and if it fails, initializes a new one. It will always return a non-nil index, but will return an err if the reading from the file or the unmarshalling has failed.
+func LoadIndex(filename string) (idx *Index, err error) {
+	idx = &Index{
+		Sites: make(map[string]*site),
+		Cache: make([]*page, 0),
+	}
+	b, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return
+	}
+	err = json.Unmarshal(b, idx)
+	return
 }
 
 func newSite(target string) *site {

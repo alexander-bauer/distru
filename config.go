@@ -7,11 +7,12 @@ import (
 
 type config struct {
 	Version    string   //The Distru version that generated this config
+	IndexPath  string   //The path to which the Index is to be saved and loaded
 	Indexers   int      //The number of indexer processes that should be run
 	AutoIndex  []string //A list of sites to index on startup
 	Resources  []string //A list of sites from which to request trusted indexes
 	ResTimeout int      //Number of seconds to wait for response from Resources
-	Idx        *Index   `json:",omitempty"` //The local index
+	Idx        *Index   `json:"-"` //The local index, not saved with config
 }
 
 func (conf *config) save(filename string) error {
@@ -40,16 +41,14 @@ func GetConfig(filename string) *config {
 	if err != nil {
 		conf = &config{
 			Version:    Version,
+			IndexPath:  "/var/tmp/distru.index",
 			Indexers:   1,
 			AutoIndex:  make([]string, 0),
 			Resources:  make([]string, 0),
 			ResTimeout: 8,
-			Idx: &Index{
-				Sites: make(map[string]*site),
-				Cache: make([]*page, 0),
-			},
 		}
 		conf.save(filename)
 	}
+	conf.Idx, _ = LoadIndex(conf.IndexPath)
 	return conf
 }

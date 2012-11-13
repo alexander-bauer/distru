@@ -17,7 +17,7 @@ func Serve(conf *config) {
 		"\n\tSites indexed:\t", len(conf.Idx.Sites))
 
 	//Start the Index Maintainer for the index.
-	MaintainIndex(conf.Idx, conf.Indexers)
+	MaintainIndex(conf.Idx, conf.Indexers, conf.IndexPath)
 
 	go func() {
 		for i := range conf.AutoIndex {
