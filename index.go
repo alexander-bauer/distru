@@ -12,7 +12,8 @@ import (
 )
 
 const (
-	BotName = "Distru"
+	BotName  = "Distru"
+	HomePage = "https://github.com/SashaCrofter/distru"
 )
 
 type Index struct {

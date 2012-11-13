@@ -24,7 +24,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 		return nil, nil, nil
 	}
 
-	req.Header.Set("User-Agent", BotName)
+	req.Header.Set("User-Agent", BotName+" +"+HomePage)
 	req.Header.Set("Accept", "text/html")
 
 	//Get the content of the webpage via HTTP, using the
