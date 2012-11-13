@@ -46,6 +46,9 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 		}
 	} else {
 		conn, err = net.DialTimeout("tcp", remote+":9049", time.Duration(timeout)*time.Second)
+		if err != nil {
+			return
+		}
 	}
 	defer conn.Close()
 
