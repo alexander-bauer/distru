@@ -13,6 +13,14 @@ import (
 
 //getPage is a complex constructor for the page object. It appends path to target in order to get the target webpage. It then uses http.Get to get the body of that webpage, which it then uses regexp to scrape for links. Those links are sorted into internal and external. The internal links are resolved to be absolute (internal) links on the webserver, and then returned, without duplicates, as a map[string]struct{}. All unique external links on the page are returned in the second map[string]struct{}.
 func getPage(target, path string, client http.Client) (*page, map[string]struct{}, map[string]struct{}) {
+	//Because of the tendency of URLs with "?" in them
+	//to trigger serverside applications, those need to
+	//be disallowed. There could otherwise be a *lot*
+	//of requests.
+	if strings.Contains(path, "?") {
+		return nil, nil, nil
+	}
+
 	//Parse the target URI, return empty if it fails.
 	accessURI, err := url.ParseRequestURI(target + path)
 	if err != nil {

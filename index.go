@@ -150,7 +150,7 @@ func newSite(target string) *site {
 	//We'll loop until there are no more unresolved pages. Then we'll
 	//set isFinished to true, and break the loop.
 
-	pool := make(chan string, 16) //This chan will contain new paths to index
+	pool := make(chan string, 64) //This chan will contain new paths to index
 	status := make(chan bool, 1)  //This chan will be passed true if a pager is beginning to index, and false if it has finished
 	workchan := make(chan int, 0) //This chan will be used by the worker handler to signal to the main for loop that it has just recieved an update
 
@@ -205,11 +205,14 @@ func newSite(target string) *site {
 		}
 		//If the pool buffer is full, we start
 		//16 more pagers.
-		if len(pool) == cap(pool) {
-			for i := 0; i < 16; i++ {
-				go pager(pool, status, target, client, rperm, pages, links)
-			}
-		}
+
+		/*
+			//This may actually be a terrible idea.
+			if len(pool) == cap(pool) {
+				for i := 0; i < 16; i++ {
+					go pager(pool, status, target, client, rperm, pages, links)
+				}
+			}*/
 	}
 
 	linkArray := make([]string, 0, len(links))
