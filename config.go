@@ -5,6 +5,20 @@ import (
 	"io/ioutil"
 )
 
+var (
+	defaultConfig = &config{
+		Version:    Version,
+		Indexers:   1,
+		AutoIndex:  make([]string, 0),
+		Resources:  make([]string, 0),
+		ResTimeout: 8,
+		Idx: &Index{
+			Sites: make(map[string]*site, 0),
+			Cache: make([]*page, 0),
+		},
+	}
+)
+
 type config struct {
 	Version    string   //The Distru version that generated this config
 	Indexers   int      //The number of indexer processes that should be run
@@ -22,33 +36,27 @@ func (conf *config) save(filename string) error {
 	return ioutil.WriteFile(filename, b, 0660)
 }
 
-func loadConf(filename string) (*config, error) {
-	b, err := ioutil.ReadFile(filename)
+func loadConf(filename string) (conf *config, err error) {
+	//If we get an error, return the default.
+	conf = &*defaultConfig
+
+	var b []byte
+	b, err = ioutil.ReadFile(filename)
 	if err != nil {
-		return nil, err
+		return
 	}
-	var conf config
 	err = json.Unmarshal(b, &conf)
 	if err != nil {
-		return nil, err
+		return
 	}
-	return &conf, nil
+	return
 }
 
 func GetConfig(filename string) *config {
 	conf, err := loadConf(filename)
 	if err != nil {
-		conf = &config{
-			Version:    Version,
-			Indexers:   1,
-			AutoIndex:  make([]string, 0),
-			Resources:  make([]string, 0),
-			ResTimeout: 8,
-			Idx: &Index{
-				Sites: make(map[string]*site),
-				Cache: make([]*page, 0),
-			},
-		}
+		//If we got an error, then we were also
+		//given the default, so save it.
 		conf.save(filename)
 	}
 	return conf
