@@ -18,11 +18,17 @@ func ServeWeb() {
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//get the search term and save it as searchTerm
-	searchTerm := r.URL.Path[len("/search/"):]
-	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerm + "\"")
+	searchTerms := r.URL.Path[len("/search/"):]
+	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerms + "\"")
 
 	//Perform the search.
-	results := Conf.Search(strings.Split(searchTerm, " "))
+	results, terms := Conf.Search(strings.Split(searchTerms, " "))
+
+	searchTerms = " "
+	for i := range terms {
+		//Redefine searchTerms with the filtered terms.
+		searchTerms += terms[i] + " "
+	}
 
 	log.Println("<-"+r.RemoteAddr+"> results:", len(results))
 
@@ -33,9 +39,9 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//add the page
-	w.Write([]byte("<html><head><title>Distru :: Searching " + searchTerm + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
+	w.Write([]byte("<html><head><title>Distru :: Searching" + searchTerms + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <strong>" + searchTerm + "</strong></div></div>"))
+	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <strong>" + searchTerms + "</strong></div></div>"))
 
 	for i := range results {
 		//get url and remove the http://
