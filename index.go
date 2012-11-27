@@ -56,7 +56,7 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 	//Initialize a new reader.
 	r := bufio.NewReader(conn)
 
-	//Create a new decoder for reading the JSON
+	//Create a new decoder for reading the Bencode
 	//directly off the wire.
 	dec := bencode.NewDecoder(r)
 
@@ -65,7 +65,7 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 	var remoteIndex Index
 
 	//Upon initializing the connection, the
-	//remote will immediately serve its JSON
+	//remote will immediately serve its Bencode
 	//index. We will decode into the
 	//remoteIndex object.
 	err = dec.Decode(&remoteIndex)
@@ -95,7 +95,49 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 		//Repeat until we've gone through all of the
 		//values in remoteIndex.
 	}
-	return nil
+	return
+}
+
+//Retrieves a site's index of itself, and automatically trusts it. It discards all other sites indexes by the remote. The timeout behavior is equivalent to that of MergeRemote. It is important to note that s may be nil.
+func GetSiteSelfIndex(remote string, timeout int) (s *site, err error) {
+	//Dial the connection here.
+	var conn net.Conn
+	if timeout == 0 {
+		conn, err = net.Dial("tcp", remote+":9049")
+		if err != nil {
+			return
+		}
+	} else {
+		conn, err = net.DialTimeout("tcp", remote+":9049", time.Duration(timeout)*time.Second)
+		if err != nil {
+			return
+		}
+	}
+	defer conn.Close()
+
+	//Initialize a new reader.
+	r := bufio.NewReader(conn)
+
+	//Create a new decoder for reading the Bencode
+	//directly off the wire.
+	dec := bencode.NewDecoder(r)
+
+	//Create a place for the decoder to decode
+	//into.
+	var remoteIndex Index
+
+	//Upon initializing the connection, the
+	//remote will immediately serve its Bencode
+	//index. We will decode into the
+	//remoteIndex object.
+	err = dec.Decode(&remoteIndex)
+	if err != nil {
+		return
+	}
+
+	s = remoteIndex.Sites["http://"+remote]
+	//s may be nil here. This
+	return
 }
 
 //Writes a Bencoded stream to the provided io.Writer. (This can be a Conn object.)
@@ -133,7 +175,15 @@ func Indexer(index *Index, pending <-chan string) {
 	}
 }
 
-func newSite(target string) *site {
+func newSite(target string) (s *site) {
+	s, _ = GetSiteSelfIndex(target, 0)
+	if s != nil {
+		//If we received the site properly,
+		//and it had an index of itself, then
+		//there is no need to index it ourselves.
+		return
+	}
+
 	target = "http://" + target
 
 	//Create an http.Client to control the webpage requests.
@@ -230,12 +280,12 @@ func newSite(target string) *site {
 		linkArray = append(linkArray, k)
 	}
 
-	site := &site{
+	s = &site{
 		Time:  time.Now().String(),
 		Pages: pages,
 		Links: linkArray,
 	}
-	return site
+	return
 }
 
 func pager(pool chan string, status chan<- bool, target string, client http.Client, rperm *robotstxt.Group, pages map[string]*page, links map[string]struct{}) {
