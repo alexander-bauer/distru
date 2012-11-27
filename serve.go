@@ -52,7 +52,7 @@ func handleConn(conf *config, conn net.Conn) {
 	prefix := "<-" + conn.RemoteAddr().String() + ">"
 
 	log.Println(prefix, "new connection")
-	err := conf.Idx.JSON(conn)
+	err := conf.Idx.Bencode(conn)
 	if err != nil {
 		log.Println(prefix, err)
 	} else {

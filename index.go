@@ -2,8 +2,8 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"github.com/temoto/robotstxt.go"
+	"github.com/zeebo/bencode"
 	"io"
 	"log"
 	"net"
@@ -19,11 +19,11 @@ const (
 type Index struct {
 	Sites map[string]*site //A map of fully indexed webpages.
 	Cache []*page          //Pages that recently turned up in the search results
-	Queue chan string      `json:"-"` //The channel which controls Indexers
+	Queue chan string      `bencode:"-"` //The channel which controls Indexers
 }
 
 type site struct {
-	Time  time.Time        //The time when the site finished indexing
+	Time  string           //When the site finished indexing as Time.String()
 	Pages map[string]*page //Nonordered map of pages on the server
 	Links []string         //List of all unique links collected from all pages on the site
 }
@@ -31,7 +31,7 @@ type site struct {
 type page struct {
 	Title       string         //The contents of the <title> tag
 	Description string         //The description of the page
-	Time        time.Time      //The time that this page was either indexed or recieved from another instance
+	Time        string         //The time that this page was either indexed or recieved from another instance
 	Link        string         //The fully qualified link to this page
 	WordCount   map[string]int //Counts for every plaintext word on the webpage
 }
@@ -58,7 +58,7 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 
 	//Create a new decoder for reading the JSON
 	//directly off the wire.
-	dec := json.NewDecoder(r)
+	dec := bencode.NewDecoder(r)
 
 	//Create a place for the decoder to decode
 	//into.
@@ -79,7 +79,9 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 		//the remote index is trusted, *and* newer than the
 		//local one, add the remote site to the local index.
 		_, isPresent = index.Sites[k]
-		if !isPresent || (trustNew && index.Sites[k].Time.Before(v.Time)) {
+		localTime, _ := time.Parse("ANSIC", v.Time)
+		remoteTime, _ := time.Parse("ANSIC", index.Sites[k].Time)
+		if !isPresent || trustNew && remoteTime.Before(localTime) {
 			index.Sites[k] = v
 		}
 		//Repeat until we've gone through all of the
@@ -88,10 +90,10 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 	return nil
 }
 
-//Index.JSON writes a JSON-encoded (encoding/json) stream to the provided io.Writer. (This can be a Conn object.)
-func (index *Index) JSON(w io.Writer) error {
+//Writes a Bencoded stream to the provided io.Writer. (This can be a Conn object.)
+func (index *Index) Bencode(w io.Writer) error {
 	//Create an encoder for the io.Writer.
-	enc := json.NewEncoder(w)
+	enc := bencode.NewEncoder(w)
 	return enc.Encode(index)
 }
 
@@ -221,7 +223,7 @@ func newSite(target string) *site {
 	}
 
 	site := &site{
-		Time:  time.Now(),
+		Time:  time.Now().String(),
 		Pages: pages,
 		Links: linkArray,
 	}

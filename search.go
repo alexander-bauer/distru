@@ -24,7 +24,7 @@ func (conf *config) Search(terms []string) []*page {
 			for i := range terms {
 				_, isPresent := vv.WordCount[terms[i]]
 				if isPresent {
-					vv.Time = time.Now()
+					vv.Time = time.Now().String()
 					bareresults = append(bareresults, vv)
 				}
 			}

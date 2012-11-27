@@ -132,7 +132,7 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	return &page{
 		Title:       string(title),
 		Description: string(descriptionb),
-		Time:        time.Now(),
+		Time:        time.Now().String(),
 		Link:        target + path,
 		WordCount:   wc,
 	}, internalLinks, externalLinks
