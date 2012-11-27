@@ -36,9 +36,10 @@ func getPage(target, path string, client http.Client) (*page, map[string]struct{
 	req.Header.Set("Accept", "text/html")
 
 	//Get the content of the webpage via HTTP, using the
-	//existing http.Client, and return blank if it fails.
+	//existing http.Client, and return blank if it fails,
+	//or if the status is anything but OK (200).
 	resp, err := client.Do(req)
-	if err != nil {
+	if err != nil || resp.StatusCode != http.StatusOK {
 		return nil, nil, nil
 	}
 	defer resp.Body.Close()
