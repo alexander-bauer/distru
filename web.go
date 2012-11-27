@@ -63,7 +63,7 @@ func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	javascript, err := ioutil.ReadFile("ui/distru.js")
+	javascript, err := ioutil.ReadFile("ui/search.js")
 	if err != nil {
 		panic(err)
 	}
