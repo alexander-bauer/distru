@@ -50,7 +50,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching" + searchTerms + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <span id=\"term\"><strong>" + searchTerms + "</strong></span><input type=\"text\" onkeydown=\"searchThis();\" onkeypress=\"isEnter(event);\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/></div></div><div id=\"blank\"></div><script type=\"text/javascript\">"))
+	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <span id=\"term\"><strong>" + searchTerms + "</strong></span><a href=\"/\" class=\"back\">Distru</a><input type=\"text\" onkeydown=\"searchThis();\" onkeypress=\"isEnter(event);\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/></div></div><div id=\"blank\"></div><script type=\"text/javascript\">"))
 	w.Write(parseJS)
 	w.Write(searchJS)
 	w.Write([]byte("</script>"))
