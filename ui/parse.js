@@ -68,7 +68,32 @@ function doMath(term) {
 		} //close hex
 		
 		else if (isOctal(term)) {
-			//TODO
+			var original = term;
+			term = term.replace("+", " + ");
+			term = term.replace("-", " - ");
+			term = term.replace("*", " * ");
+			term = term.replace("/", " / ");
+			term = term.replace("%", " % ");
+			
+			term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
+			
+			var array = term.split(" ");
+			
+			
+			for (var i = 0; i < array.length; i++) {
+				if (!(array[i] == "+" || array[i] == "-" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
+					if (array[i].length > 2 && array[i].substring(0,2) == "0o") {
+						var temp = array[i].substring(2);
+						array[i] = parseInt(temp, 8);
+					}
+					else array[i] = parseInt(array[i], 8);
+				}
+			}
+			term = array.join(' ');			
+			var value = eval(term);
+			value = value.toString(8);
+			
+			document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>0o" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
 		} //close octal
 		
 		else if (isBinary(term)) {
