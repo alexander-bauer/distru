@@ -9,11 +9,9 @@ var url = window.location.pathname
 var term = url.substring(url.indexOf(":9048/search/")+9);
 
 // The function parse() decides what to do with the term.
-// There are two things that can be done. First, if it
+// There are a few things that can be done. First, if it
 // is a mathematical equation, then do the math and add a
 // div on the search page with the answer for the user.
-// Second, if there is only one word, and it is a real word,
-// then define it. 
 function parse() {
 	doMath(term);
 	
