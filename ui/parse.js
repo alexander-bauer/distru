@@ -34,20 +34,70 @@ function doMath(term) {
 		term = term.toLowerCase()
 		term = decodeURIComponent(term);
 		
-		var operators = {"plus" : "+", "and" : "+", "minus" : "-", "times" : "*", "x" : "*",
+		var operators = {"plus" : "+", "and" : "+", "minus" : "-", "times" : "*",
 						 "over" : "/", "divide" : "/", "mod" : "%", "modulus" : "%"};
 		
 		for (var val in operators) {
 			term = term.replace(new RegExp(val, "g"), operators[val]);
 		}
-				
+		
+		
+		if (isHex(term)){
+			var original = term;		
+			var array = term.split(" ");
+			
+			for (var i = 0; i < array.length; i++) {
+				if (!(array[i] == "+" || array[i] == "-" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
+					array[i] = parseInt(array[i], 16);
+				}
+			}
+			term = array.join(' ');
+			alert(term);
+			
+			var value = eval(term);
+			
+			value = value.toString(16);
+			
+			document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>0x" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
+		} //close hex
+		
+		else if (isOctal(term)) {
+			//TODO
+		} //close octal
+		
+		else if (isBinary(term)) {
+			//TODO
+		} //close binary
+		
+		else
+		{
 		var value = eval(term);
-		if (!isNaN(value)) {
-			// display some html
-			 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + term + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
-		}
+		
+			if (!isNaN(value)) {
+				// display some html
+				 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + term + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
+			}
+		} //close else
 	}
 	catch (e) {}
+}
+
+function isHex() {
+	if (term.indexOf("0x") !== -1)
+		return true;
+	else return false;
+}
+
+function isOctal() {
+	if (term.indexOf("0o") !== -1)
+		return true;
+	return false;
+}
+
+function isBinary() {
+	if (term.indexOf("0b") !== -1)
+		return true;
+	return false;
 }
 
 function unhideBubble() {
