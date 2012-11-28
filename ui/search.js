@@ -21,4 +21,4 @@ function isEnter(e) {
 			window.location += 'search/'+document.getElementById('search').value;
         }
 
- }
+}

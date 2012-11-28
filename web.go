@@ -37,11 +37,17 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	javascript, err := ioutil.ReadFile("ui/calc.js")
+		if err != nil {
+			panic(err)
+		}
 
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching" + searchTerms + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <strong>" + searchTerms + "</strong></div></div>"))
+	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <span id=\"term\"><strong>" + searchTerms + "</strong></span></div></div><script type=\"text/javascript\">"))
+	w.Write(javascript)
+	w.Write([]byte("</script>"))
 
 	for i := range results {
 		//get url and remove the http://
