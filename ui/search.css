@@ -113,3 +113,14 @@ a {
 	top: -20px;
 	left: 90px;
 }
+
+.search {
+	border: none;
+	background-color: #333;
+	padding: 8px;
+	color: #FFF;
+	position: absolute;
+	right: 0;
+	top: 0;
+	text-align: right;
+}
