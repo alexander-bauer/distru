@@ -44,8 +44,16 @@ function doMath(term) {
 		var value = eval(term);
 		if (!isNaN(value)) {
 			// display some html
-			
+			 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + term + " = <strong>" + value + "</strong></div><div class='bubble hidden'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
 		}
 	}
 	catch (e) {}
+}
+
+function unhideBubble() {
+	document.getElementsByClassName("bubble").item(0).style.opacity = "1";
+}
+
+function hideBubble() {
+	document.getElementsByClassName("bubble").item(0).style.opacity = "0";
 }

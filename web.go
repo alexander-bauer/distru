@@ -45,7 +45,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching" + searchTerms + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
-	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <span id=\"term\"><strong>" + searchTerms + "</strong></span></div></div><div class=\"blank\">&nbsp;</div><script type=\"text/javascript\">"))
+	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <span id=\"term\"><strong>" + searchTerms + "</strong></span></div></div><div id=\"blank\"></div><script type=\"text/javascript\">"))
 	w.Write(javascript)
 	w.Write([]byte("</script>"))
 
