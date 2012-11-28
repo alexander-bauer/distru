@@ -35,7 +35,7 @@ function doMath(term) {
 		term = decodeURIComponent(term);
 		
 		var operators = {"plus" : "+", "and" : "+", "minus" : "-", "times" : "*", "x" : "*",
-						 "over" : "/", "divide" : "/", "divided by" : "/", "mod" : "%", "modulus" : "%"};
+						 "over" : "/", "divide" : "/", "mod" : "%", "modulus" : "%"};
 		
 		for (var val in operators) {
 			term = term.replace(new RegExp(val, "g"), operators[val]);
@@ -44,7 +44,7 @@ function doMath(term) {
 		var value = eval(term);
 		if (!isNaN(value)) {
 			// display some html
-			 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + term + " = <strong>" + value + "</strong></div><div class='bubble hidden'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
+			 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + term + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
 		}
 	}
 	catch (e) {}

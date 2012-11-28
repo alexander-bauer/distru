@@ -16,7 +16,6 @@ a {
 .holder {
 	margin-left: auto;
 	margin-right: auto;
-	z-index: 1;
 }
 
 .searchterm {
@@ -24,14 +23,12 @@ a {
 	color: #FFF;
 	padding: 10px;
 	margin-bottom: 10px;
-	z-index: 1;
 }
 
 .results {
 	background-color: #FFF;
 	padding: 10px;
 	margin-bottom: 10px;
-	z-index: 1;
 }
 
 .results:hover {
@@ -64,10 +61,6 @@ a {
 	padding: 5px;
 }
 
-.helper {
-	color: #AAA;
-}
-
 .calculate {
 	background-color: #EEE;
 	padding: 10px;
@@ -86,24 +79,26 @@ a {
 }
 
 .bubble {
-	position: relative;
+	position: absolute;
 	background-color: #EEE;
 	margin: 0;
 	padding:10px;
-	text-align:center;
-	width:180px;
+	text-align: center;
+	width: 180px;
+	left: 50%;
+    margin-left: -100px;
 	margin-top: 10px;
 	-webkit-border-radius: 10px;
 	-moz-border-radius: 10px;
 	border-radius: 10px;
 	color: #000;
-	z-index: 10;
 	opacity: 0;
 	-webkit-transition: opacity .2s ease;
 	-moz-transition: opacity .2s ease;
 	-o-transition: opacity .2s ease;
 	-ms-transition: opacity .2s ease;
 	transition: opacity .2s ease;
+	z-index: 10;
 }
 
 .bubble:after {
@@ -115,8 +110,6 @@ a {
 	border-width: 10px;
 	height:0;
 	width:0;
-	position:absolute;
 	top: -20px;
 	left: 90px;
-	z-index: 10;
 }
