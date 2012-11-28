@@ -41,9 +41,10 @@ function doMath(term) {
 			term = term.replace(new RegExp(val, "g"), operators[val]);
 		}
 				
-		var x = eval(term);
-		if (!isNaN(x)) {
-			doMath(x);
+		var value = eval(term);
+		if (!isNaN(value)) {
+			// display some html
+			
 		}
 	}
 	catch (e) {}
