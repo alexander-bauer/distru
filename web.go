@@ -37,7 +37,12 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	javascript, err := ioutil.ReadFile("ui/parse.js")
+	parseJS, err := ioutil.ReadFile("ui/parse.js")
+		if err != nil {
+			panic(err)
+		}
+		
+	searchJS, err := ioutil.ReadFile("ui/search.js")
 		if err != nil {
 			panic(err)
 		}
@@ -46,7 +51,8 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("<html><head><title>Distru :: Searching" + searchTerms + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
 	w.Write(css)
 	w.Write([]byte("</style></head><body><div class =\"holder\"><div class=\"searchterm\">" + strconv.Itoa(len(results)) + " results for <span id=\"term\"><strong>" + searchTerms + "</strong></span><input type=\"text\" onkeydown=\"searchThis();\" onkeypress=\"isEnter(event);\" id=\"search\" class=\"search\" placeholder=\"Search freely\"/></div></div><div id=\"blank\"></div><script type=\"text/javascript\">"))
-	w.Write(javascript)
+	w.Write(parseJS)
+	w.Write(searchJS)
 	w.Write([]byte("</script>"))
 
 	for i := range results {
