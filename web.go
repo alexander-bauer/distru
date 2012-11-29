@@ -38,14 +38,14 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	parseJS, err := ioutil.ReadFile("ui/parse.js")
-		if err != nil {
-			panic(err)
-		}
-		
+	if err != nil {
+		panic(err)
+	}
+
 	searchJS, err := ioutil.ReadFile("ui/search.js")
-		if err != nil {
-			panic(err)
-		}
+	if err != nil {
+		panic(err)
+	}
 
 	//add the page
 	w.Write([]byte("<html><head><title>Distru :: Searching" + searchTerms + "</title><div class = \"version\">" + Version + "</div><style type=\"text/css\">"))
