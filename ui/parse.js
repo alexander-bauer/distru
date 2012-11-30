@@ -47,10 +47,10 @@ function parseMath(term) {
 			if (array[i].indexOf("^") !== -1) {
 				array[i] = power(i, term, array);
 			}
-			if (array[i].indexOf("sqrt") !== -1) {
-			array[i] = square(i, term, array);
+			else if (array[i].indexOf("sqrt") !== -1) {
+				array[i] = square(i, term, array);
 			}
-			if (array[i].indexOf("!") !== -1) {
+			else if (array[i].indexOf("!") !== -1) {
 				array[i] = factorial(array[i]);
 			}
 			//TODO: MORE.
@@ -99,7 +99,7 @@ function doMath(base, type, newterm, original) {
 	
 	//THIS fIXES ALL DAMN SPACING ERRORS.
 	term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
-	
+		
 	var array = term.split(" ");
 		
 	// Thanks to Prestaul of stack overflow
@@ -107,17 +107,24 @@ function doMath(base, type, newterm, original) {
 	
 	for (var i = 0; i < array.length; i++) {
 		if (!(array[i] == "+" || array[i] == "-" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
-			if (array[i].length > 2 && array[i].substring(0,2) == "0o" || array[i].substring(0,2) == "0b") {
+			if (array[i].length > 2 && array[i].substring(0,2) == "0o" || array[i].substring(0,2) == "0b" || array[i].substring(0,2) == "0x") {
 				var temp = array[i].substring(2);
 				array[i] = parseInt(temp, base);
 			}
 		}
 	}
-	term = array.join(' ');			
+		
+	term = array.join(' ');
+					
 	var value = eval(term);
 	value = value.toString(base);
 	
-	document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + type + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
+	if (value < 0) {
+		value = Math.abs(value);
+		value = "-" + type + value;
+	}
+	
+	document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
 }
 
 // The function unhideBubble() unhides the bubble!
@@ -240,6 +247,9 @@ function factorial(n) {
 	if (n.indexOf("!") !== -1) {
 		n = n.substring(0,n.indexOf("!"));
 	}
+	
+	if (n < 0)
+		return "negativenumber";
 	
 	//Check to see if there's Hex involved.
 	if (n.indexOf("0x") !== -1) {
