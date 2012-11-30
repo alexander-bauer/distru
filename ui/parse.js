@@ -74,6 +74,8 @@ function parseMath(term) {
 			doMath(2, "0b", term, original);
 		} //close binary
 		
+		
+				
 		else
 		{
 		var value = eval(term);
@@ -101,23 +103,52 @@ function doMath(base, type, newterm, original) {
 	term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
 		
 	var array = term.split(" ");
+	
+	var h = false;
+	var o = false;
+	var b = false;
 		
 	// Thanks to Prestaul of stack overflow
 	// http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
 	
 	for (var i = 0; i < array.length; i++) {
 		if (!(array[i] == "+" || array[i] == "-" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
-			if (array[i].length > 2 && array[i].substring(0,2) == "0o" || array[i].substring(0,2) == "0b" || array[i].substring(0,2) == "0x") {
+			if (array[i].length > 2) {
 				var temp = array[i].substring(2);
-				array[i] = parseInt(temp, base);
+				if (array[i].substring(0,2) == "0x") {
+					array[i] = parseInt(temp, 16);
+					h = true;
+				}
+				else if (array[i].substring(0,2) == "0o") {
+					array[i] = parseInt(temp, 8);
+					o = true;
+				}
+				else if (array[i].substring(0,2) == "0b") {
+					array[i] = parseInt(temp, 2);
+					b = true;
+				}
 			}
 		}
 	}
 		
 	term = array.join(' ');
-					
+						
 	var value = eval(term);
 	value = value.toString(base);
+	
+	switch (base) {
+		case 2:
+			value = "0b" + value;
+			break;
+		case 8:
+			value = "0o" + value;
+			break;
+		case 16:
+			value = "0x" + value;
+			break;
+		default:
+			value = "THISWILLNEVERHAPPEN";
+	}
 	
 	if (value < 0) {
 		value = Math.abs(value);
