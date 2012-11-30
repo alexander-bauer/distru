@@ -25,7 +25,6 @@ function parse() {
 // not a real equation, then don't do the math.
 function parseMath(term) {
 	try {
-		
 		// put it in lowercase so we don't have to deal
 		// with this shit being case sensitive and whatnot
 		term = term.toLowerCase()
@@ -38,17 +37,38 @@ function parseMath(term) {
 			term = term.replace(new RegExp(val, "g"), operators[val]);
 		}
 		
+		//Fix spacing errors and put each thing in an array
+		term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
+		var original = term;
+		var array = term.split(" ");
 		
-		if (isHex(term)){
-			doMath(16, "0x", term);
+		//Check to see if there's some more math we can do.
+		for (var i = 0; i < array.length; i++) {
+			//Power of shit
+			power(i, term, array);
+			
+			//
+			//	TODO: MORE STUFF
+			//
+			
+		}
+				
+		//put everything back into a string from the array
+		term = array.join(' ');		
+				
+		//Check to see if there's Hex involved.
+		if (term.indexOf("0x") !== -1){
+			doMath(16, "0x", term, original);
 		} //close hex
 		
-		else if (isOctal(term)) {
-			doMath(8, "0o", term);
+		//Check to see if there's Octal involved.
+		else if (term.indexOf("0o") !== -1) {
+			doMath(8, "0o", term, original);
 		} //close octal
 		
-		else if (isBinary(term)) {
-			doMath(2, "0b", term);
+		//Check to see if there's binary involved.
+		else if (term.indexOf("0b") !== -1) {
+			doMath(2, "0b", term, original);
 		} //close binary
 		
 		else
@@ -57,7 +77,7 @@ function parseMath(term) {
 		
 			if (!isNaN(value)) {
 				// display some html
-				 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + term + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
+				 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
 			}
 		} //close else
 	}
@@ -67,8 +87,7 @@ function parseMath(term) {
 // The function doMath(base, type, newterm) does math!
 // More specifically, it does hex, octal, and binary 
 // mathematical equations. 
-function doMath(base, type, newterm) {
-	var original = newterm;
+function doMath(base, type, newterm, original) {
 	term = newterm;
 	term = term.replace("+", " + ");
 	term = term.replace("-", " - ");
@@ -76,10 +95,13 @@ function doMath(base, type, newterm) {
 	term = term.replace("/", " / ");
 	term = term.replace("%", " % ");
 	
+	//THIS fIXES ALL DAMN SPACING ERRORS.
 	term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
 	
 	var array = term.split(" ");
-	
+		
+	// Thanks to Prestaul of stack overflow
+	// http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
 	
 	for (var i = 0; i < array.length; i++) {
 		if (!(array[i] == "+" || array[i] == "-" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
@@ -87,7 +109,6 @@ function doMath(base, type, newterm) {
 				var temp = array[i].substring(2);
 				array[i] = parseInt(temp, base);
 			}
-			else array[i] = parseInt(array[i], base);
 		}
 	}
 	term = array.join(' ');			
@@ -95,30 +116,6 @@ function doMath(base, type, newterm) {
 	value = value.toString(base);
 	
 	document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + type + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
-}
-
-// The function isHex() determines if 
-// it is a hex number or not.
-function isHex() {
-	if (term.indexOf("0x") !== -1)
-		return true;
-	else return false;
-}
-
-// The function isOctal() determines if
-// it is an octal number or not
-function isOctal() {
-	if (term.indexOf("0o") !== -1)
-		return true;
-	return false;
-}
-
-// The function isBinary() determines if
-// it is a binary number or not
-function isBinary() {
-	if (term.indexOf("0b") !== -1)
-		return true;
-	return false;
 }
 
 // The function unhideBubble() unhides the bubble!
@@ -129,4 +126,66 @@ function unhideBubble() {
 // The function hideBubble() hides the bubble!
 function hideBubble() {
 	document.getElementsByClassName("bubble").item(0).style.opacity = "0";
+}
+
+function power(i, term, array) {
+	if (array[i].indexOf("^") !== -1) {
+		var before = array[i].substring(0,array[i].indexOf("^"));
+		var after = array[i].substring(array[i].indexOf("^")+1);
+		var beforeo = false;
+		var beforeb = false;
+		var beforeh = false;
+		var befored = false;
+			
+		//Check to see if there's Octal involved.
+		if (array[i].indexOf("0o") !== -1 && before.indexOf("0o") !== -1) {
+			before = before.substring(2);
+			before = parseInt(before, 8);
+			beforeo = true;
+		} //close before octal
+										
+		//Check to see if there's Binary involved.
+		else if (array[i].indexOf("0b") !== -1 && before.indexOf("0b") !== -1) {
+			before = before.substring(2);
+			before = parseInt(before, 2);
+			beforeb = true;
+		} //close before octal
+		
+		//Check to see if there's Hex involved.
+		else if (array[i].indexOf("0x") !== -1 && before.indexOf("0x") !== -1) {
+			before = before.substring(2);
+			before = parseInt(before, 16);
+			beforeh = true;
+		} //close before hex
+		
+		else {
+			before = parseInt(before, 10);
+			befored = true;
+		}
+		
+		if (array[i].indexOf("0b") !== -1 && after.indexOf("0b") !== -1) {
+			after = after.substring(2);
+			after = parseInt(after, 2);
+		} //close after octal
+		
+		else if (array[i].indexOf("0o") !== -1 && after.indexOf("0o") !== -1) {
+			after = after.substring(2);
+			after = parseInt(after, 8);
+		} //close after octal
+						
+		else if (array[i].indexOf("0x") !== -1 && after.indexOf("0x") !== -1) {
+			after = after.substring(2);
+			after = parseInt(after, 16);
+		} //close after hex
+		
+		else {
+			after = parseInt(after, 10);
+		}
+						
+		array[i] = Math.pow(before, after);
+						
+		if (beforeh) array[i] = "0x" + array[i].toString(16);
+		if (beforeo) array[i] = "0o" + array[i].toString(8);
+		if (beforeb) array[i] = "0b" + array[i].toString(2);
+	} //close power of shit
 }
