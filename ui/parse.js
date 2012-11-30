@@ -44,13 +44,14 @@ function parseMath(term) {
 		
 		//Check to see if there's some more math we can do.
 		for (var i = 0; i < array.length; i++) {
-			//Power of shit
-			power(i, term, array);
+			if (array[i].indexOf("^") !== -1) {
+				array[i] = power(i, term, array);
+			}
+			if (array[i].indexOf("sqrt") !== -1) {
+			array[i] = square(i, term, array);
+			}
 			
-			//
-			//	TODO: MORE STUFF
-			//
-			
+			//TODO: MORE.
 		}
 				
 		//put everything back into a string from the array
@@ -74,7 +75,7 @@ function parseMath(term) {
 		else
 		{
 		var value = eval(term);
-		
+		alert(value);
 			if (!isNaN(value)) {
 				// display some html
 				 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
@@ -129,63 +130,104 @@ function hideBubble() {
 }
 
 function power(i, term, array) {
-	if (array[i].indexOf("^") !== -1) {
-		var before = array[i].substring(0,array[i].indexOf("^"));
-		var after = array[i].substring(array[i].indexOf("^")+1);
-		var beforeo = false;
-		var beforeb = false;
-		var beforeh = false;
-		var befored = false;
-			
-		//Check to see if there's Octal involved.
-		if (array[i].indexOf("0o") !== -1 && before.indexOf("0o") !== -1) {
-			before = before.substring(2);
-			before = parseInt(before, 8);
-			beforeo = true;
-		} //close before octal
-										
-		//Check to see if there's Binary involved.
-		else if (array[i].indexOf("0b") !== -1 && before.indexOf("0b") !== -1) {
-			before = before.substring(2);
-			before = parseInt(before, 2);
-			beforeb = true;
-		} //close before octal
+	var before = array[i].substring(0,array[i].indexOf("^"));
+	var after = array[i].substring(array[i].indexOf("^")+1);
+	var beforeo = false;
+	var beforeb = false;
+	var beforeh = false;
+	var befored = false;
 		
-		//Check to see if there's Hex involved.
-		else if (array[i].indexOf("0x") !== -1 && before.indexOf("0x") !== -1) {
-			before = before.substring(2);
-			before = parseInt(before, 16);
-			beforeh = true;
-		} //close before hex
-		
-		else {
-			before = parseInt(before, 10);
-			befored = true;
-		}
-		
-		if (array[i].indexOf("0b") !== -1 && after.indexOf("0b") !== -1) {
-			after = after.substring(2);
-			after = parseInt(after, 2);
-		} //close after octal
-		
-		else if (array[i].indexOf("0o") !== -1 && after.indexOf("0o") !== -1) {
-			after = after.substring(2);
-			after = parseInt(after, 8);
-		} //close after octal
-						
-		else if (array[i].indexOf("0x") !== -1 && after.indexOf("0x") !== -1) {
-			after = after.substring(2);
-			after = parseInt(after, 16);
-		} //close after hex
-		
-		else {
-			after = parseInt(after, 10);
-		}
-						
-		array[i] = Math.pow(before, after);
-						
-		if (beforeh) array[i] = "0x" + array[i].toString(16);
-		if (beforeo) array[i] = "0o" + array[i].toString(8);
-		if (beforeb) array[i] = "0b" + array[i].toString(2);
-	} //close power of shit
+	//Check to see if there's Octal involved.
+	if (array[i].indexOf("0o") !== -1 && before.indexOf("0o") !== -1) {
+		before = before.substring(2);
+		before = parseInt(before, 8);
+		beforeo = true;
+	} //close before octal
+									
+	//Check to see if there's Binary involved.
+	else if (array[i].indexOf("0b") !== -1 && before.indexOf("0b") !== -1) {
+		before = before.substring(2);
+		before = parseInt(before, 2);
+		beforeb = true;
+	} //close before octal
+	
+	//Check to see if there's Hex involved.
+	else if (array[i].indexOf("0x") !== -1 && before.indexOf("0x") !== -1) {
+		before = before.substring(2);
+		before = parseInt(before, 16);
+		beforeh = true;
+	} //close before hex
+	
+	else {
+		before = parseInt(before, 10);
+		befored = true;
+	}
+	
+	if (array[i].indexOf("0b") !== -1 && after.indexOf("0b") !== -1) {
+		after = after.substring(2);
+		after = parseInt(after, 2);
+	} //close after octal
+	
+	else if (array[i].indexOf("0o") !== -1 && after.indexOf("0o") !== -1) {
+		after = after.substring(2);
+		after = parseInt(after, 8);
+	} //close after octal
+					
+	else if (array[i].indexOf("0x") !== -1 && after.indexOf("0x") !== -1) {
+		after = after.substring(2);
+		after = parseInt(after, 16);
+	} //close after hex
+	
+	else {
+		after = parseInt(after, 10);
+	}
+					
+	array[i] = Math.pow(before, after);
+					
+	if (beforeh) array[i] = "0x" + array[i].toString(16);
+	if (beforeo) array[i] = "0o" + array[i].toString(8);
+	if (beforeb) array[i] = "0b" + array[i].toString(2);
+	
+	return array[i];
+}
+
+function square(i, term, array) {
+	var value = array[i].substring(array[i].indexOf("(")+1, array[i].indexOf(")"));
+	var h = false;
+	var o = false;
+	var b = false;
+	
+	//Check to see if there's Octal involved.
+	if (array[i].indexOf("0o") !== -1) {
+		value = value.substring(2);
+		value = parseInt(value, 8);
+		o = true;
+	} //close before octal
+									
+	//Check to see if there's Binary involved.
+	else if (array[i].indexOf("0b") !== -1) {
+		value = value.substring(2);
+		value = parseInt(value, 2);
+		b = true;
+	} //close before octal
+	
+	//Check to see if there's Hex involved.
+	else if (array[i].indexOf("0x") !== -1) {
+		value = value.substring(2);
+		value = parseInt(value, 16);
+		h = true;
+	} //close before hex
+	
+	else {
+		value = parseInt(value, 10);
+	}
+	
+	value = Math.sqrt(value);
+	array[i] = value;
+					
+	if (h) array[i] = "0x" + array[i].toString(16);
+	if (o) array[i] = "0o" + array[i].toString(8);
+	if (b) array[i] = "0b" + array[i].toString(2);
+	
+	return array[i];
 }
