@@ -8,12 +8,20 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 )
 
+//Information about the crawler.
 const (
 	BotName  = "Distru"
 	HomePage = "https://github.com/SashaCrofter/distru"
+
+	AllowedType = "text/html"
+)
+
+var (
+	DisallowedExtensions = []string{".png", ".jpg", ".gif"}
 )
 
 type Index struct {
@@ -244,6 +252,15 @@ func pager(pool chan string, status chan<- bool, target string, client http.Clie
 		if !ok {
 			return
 		}
+
+		for i := range DisallowedExtensions {
+			//Check if it has a disallowed suffix.
+			if strings.HasSuffix(strings.ToLower(path), DisallowedExtensions[i]) {
+				//If so, don't bother.
+				continue
+			}
+		}
+
 		//When we begin, we must signal that.
 		status <- true
 		//Block the page from other indexing.
