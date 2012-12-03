@@ -15,9 +15,9 @@ func (c *resultContainer) Len() int {
 	return len(c.Pages)
 }
 
-//Returns true if the relevance of c.Pages[i] is greater than that of c.Pages[j].
+//Returns true if the relevance of c.Pages[i] is less than or equal to that of c.Pages[j].
 func (c *resultContainer) Less(i, j int) bool {
-	return c.Pages[i].relevance > c.Pages[j].relevance
+	return c.Pages[i].relevance <= c.Pages[j].relevance
 }
 
 //Swaps the indexes of i and j in c.Pages.
@@ -41,6 +41,8 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 		filteredTerms = append(filteredTerms, k)
 	}
 
+	wordScore := uint64(0xffff / len(filteredTerms))
+
 	//Request indexes from all resources,
 	//and trust their results.
 	for i := range conf.Resources {
@@ -54,23 +56,28 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 			//of the word for a particular page. The number
 			//is currently discarded, because we can't rank
 			//the relevance of pages.
-			for i := range filteredTerms {
-				_, isPresent := vv.WordCount[filteredTerms[i]]
+			for _, term := range filteredTerms {
+				instances, isPresent := vv.WordCount[term]
 				if isPresent {
-					//I'm not sure why we set the time
-					//here. TODO
-					vv.Time = time.Now().String()
-					bareresults[kk] = vv
+					//We set the time here so we
+					//can put them in the cache
+					//later.
+					if _, isFoundAlready := bareresults[kk]; !isFoundAlready {
+						//If not already there, add it.
+						vv.Time = time.Now().String()
+						bareresults[kk] = vv
+					} else {
+						bareresults[kk].relevance += wordScore * uint64(instances)
+					}
 				}
 			}
 		}
 	}
-	//The results should be assigned a relevance. TODO
 	c := &resultContainer{
 		Pages: make([]*page, 0, len(bareresults)),
 	}
 	for _, v := range bareresults {
-		c.Pages = append(results, v)
+		c.Pages = append(c.Pages, v)
 	}
 
 	//Sort c by relevance.
