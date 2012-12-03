@@ -42,6 +42,7 @@ type page struct {
 	Time        string         //The time that this page was either indexed or recieved from another instance
 	Link        string         //The fully qualified link to this page
 	WordCount   map[string]int //Counts for every plaintext word on the webpage
+	relevance   uint64         //Internal unitless measure of relevance to most recent search result
 }
 
 //Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. Additionally, it will time out the connection, and not modify the Index, after the number of seconds given in timeout. (0 will cause it to use net.Dial() normally.) It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.

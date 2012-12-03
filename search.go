@@ -1,8 +1,31 @@
 package main
 
 import (
+	"sort"
 	"time"
 )
+
+//resultContainer is used to contain an array of pages so that they can be sorted.
+type resultContainer struct {
+	Pages []*page
+}
+
+//Returns the length of c.Pages.
+func (c *resultContainer) Len() int {
+	return len(c.Pages)
+}
+
+//Returns true if the relevance of c.Pages[i] is greater than that of c.Pages[j].
+func (c *resultContainer) Less(i, j int) bool {
+	return c.Pages[i].relevance > c.Pages[j].relevance
+}
+
+//Swaps the indexes of i and j in c.Pages.
+func (c *resultContainer) Swap(i, j int) {
+	swap := c.Pages[i]
+	c.Pages[i] = c.Pages[j]
+	c.Pages[j] = swap
+}
 
 //Conf.Search returns the total number of results, and a []*page containing at most maxResults number of results. It returns all of the terms searched on, (omitting duplicates.)
 func (conf *config) Search(terms []string) (results []*page, filteredTerms []string) {
@@ -42,14 +65,17 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 			}
 		}
 	}
-	//The results should be sorted by relevance here. TODO
-	results = make([]*page, 0, len(bareresults))
+	//The results should be assigned a relevance. TODO
+	c := &resultContainer{
+		Pages: make([]*page, 0, len(bareresults)),
+	}
 	for _, v := range bareresults {
-		//We may want to speed this up by eliminating
-		//append(). TODO
-		results = append(results, v)
+		c.Pages = append(results, v)
 	}
 
-	conf.Idx.Cache = append(conf.Idx.Cache, results...)
-	return
+	//Sort c by relevance.
+	sort.Sort(c)
+
+	conf.Idx.Cache = append(conf.Idx.Cache, c.Pages...)
+	return c.Pages, filteredTerms
 }
