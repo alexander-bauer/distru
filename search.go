@@ -64,7 +64,26 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 					//later.
 					if _, isFoundAlready := bareresults[kk]; !isFoundAlready {
 						//If not already there, add it.
+						oldTime, err := time.Parse("ANSIC", vv.Time)
+						if err == nil {
+							//The multiplier will be:
+							//12 divided by the number of hours since
+							//the result was last used, capped at one
+							//This means that it will be at most 1,
+							//but only if the result is newer than
+							//twelve hours old.
+							multiplier := 12 / time.Since(oldTime).Hours()
+							if multiplier > 1 {
+								multiplier = 1
+							}
+							if multiplier > 0 {
+								//If the multiplier is negative, then the
+								//timestamp is broken.
+								vv.relevance = uint64(float64(wordScore) * multiplier)
+							}
+						}
 						vv.Time = time.Now().String()
+
 						bareresults[kk] = vv
 					} else {
 						bareresults[kk].relevance += wordScore * uint64(instances)
