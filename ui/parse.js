@@ -48,10 +48,13 @@ function parseMath(term) {
 				array[i] = power(i, term, array);
 			}
 			else if (array[i].indexOf("sqrt") !== -1) {
-				array[i] = square(i, term, array);
+				array[i] = sqabs(i, term, array, 1);
 			}
 			else if (array[i].indexOf("!") !== -1) {
 				array[i] = factorial(array[i]);
+			}
+			else if (array[i].indexOf("abs") !== -1) {
+				array[i] = sqabs(i, term, array, 2);
 			}
 			//TODO: MORE.
 		}
@@ -168,6 +171,7 @@ function hideBubble() {
 	document.getElementsByClassName("bubble").item(0).style.opacity = "0";
 }
 
+// Power
 function power(i, term, array) {
 	var before = array[i].substring(0,array[i].indexOf("^"));
 	var after = array[i].substring(array[i].indexOf("^")+1);
@@ -178,22 +182,43 @@ function power(i, term, array) {
 		
 	//Check to see if there's Hex involved.
 	if (array[i].indexOf("0x") !== -1 && before.indexOf("0x") !== -1) {
-		before = before.substring(2);
-		before = parseInt(before, 16);
+		if (before.indexOf("-") !== -1) {
+			before = before.substring(3);
+			before = parseInt(before, 16);
+			before = "-" + before;
+		}
+		else {
+			before = before.substring(2);
+			before = parseInt(before, 16);
+		}
 		beforeh = true;
 	} //close before hex	
 		
 	//Check to see if there's Octal involved.
 	else if (array[i].indexOf("0o") !== -1 && before.indexOf("0o") !== -1) {
-		before = before.substring(2);
-		before = parseInt(before, 8);
+		if (before.indexOf("-") !== -1) {
+			before = before.substring(3);
+			before = parseInt(before, 8);
+			before = "-" + before;
+		}
+		else {
+			before = before.substring(2);
+			before = parseInt(before, 8);
+		}
 		beforeo = true;
 	} //close before octal
 									
 	//Check to see if there's Binary involved.
 	else if (array[i].indexOf("0b") !== -1 && before.indexOf("0b") !== -1) {
-		before = before.substring(2);
-		before = parseInt(before, 2);
+		if (before.indexOf("-") !== -1) {
+			before = before.substring(3);
+			before = parseInt(before, 2);
+			before = "-" + before;
+		}
+		else {
+			before = before.substring(2);
+			before = parseInt(before, 2);
+		}
 		beforeb = true;
 	} //close before octal
 	
@@ -203,19 +228,40 @@ function power(i, term, array) {
 	}
 	
 	if (array[i].indexOf("0x") !== -1 && after.indexOf("0x") !== -1) {
-		after = after.substring(2);
-		after = parseInt(after, 16);
+		if (after.indexOf("-") !== -1) {
+			after = after.substring(3);
+			after = parseInt(after, 16);
+			after = "-" + after;
+		}
+		else {
+			after = after.substring(2);
+			after = parseInt(after, 16);
+		}
 	} //close after hex
 	
-	else if (array[i].indexOf("0b") !== -1 && after.indexOf("0b") !== -1) {
-		after = after.substring(2);
-		after = parseInt(after, 2);
+	else if (array[i].indexOf("0o") !== -1 && after.indexOf("0o") !== -1) {
+		if (after.indexOf("-") !== -1) {
+			after = after.substring(3);
+			after = parseInt(after, 8);
+			after = "-" + after;
+		}
+		else {
+			after = after.substring(2);
+			after = parseInt(after, 8);
+		}
 	} //close after octal
 	
-	else if (array[i].indexOf("0o") !== -1 && after.indexOf("0o") !== -1) {
-		after = after.substring(2);
-		after = parseInt(after, 8);
-	} //close after octal
+	else if (array[i].indexOf("0b") !== -1 && after.indexOf("0b") !== -1) {
+		if (after.indexOf("-") !== -1) {
+			after = after.substring(3);
+			after = parseInt(after, 2);
+			after = "-" + after;
+		}
+		else {
+			after = after.substring(2);
+			after = parseInt(after, 2);
+		}
+	} //close after binary
 	
 	else {
 		after = parseInt(after, 10);
@@ -230,30 +276,55 @@ function power(i, term, array) {
 	return array[i];
 }
 
-function square(i, term, array) {
-	var value = array[i].substring(array[i].indexOf("(")+1, array[i].indexOf(")"));
+// Square Root
+// Absolute Value
+function sqabs(i, term, array, which) {
+	var value;
+	if (which == 1) value = array[i].substring(array[i].indexOf("sqrt(")+5, array[i].indexOf(")"));
+	if (which == 2) value = array[i].substring(array[i].indexOf("abs(")+4, array[i].indexOf(")"));
 	var h = false;
 	var o = false;
 	var b = false;
-	
+
 	//Check to see if there's Hex involved.
 	if (array[i].indexOf("0x") !== -1) {
-		value = value.substring(2);
-		value = parseInt(value, 16);
+		if (value.indexOf("-") !== -1) {
+			value = value.substring(3);
+			value = parseInt(value, 16);
+			value = "-" + value;
+		}
+		else {
+			value = value.substring(2);
+			value = parseInt(value, 16);
+		}
 		h = true;
 	} //close before hex
 	
 	//Check to see if there's Octal involved.
 	else if (array[i].indexOf("0o") !== -1) {
-		value = value.substring(2);
-		value = parseInt(value, 8);
+		if (value.indexOf("-") !== -1) {
+			value = value.substring(3);
+			value = parseInt(value, 8);
+			value = "-" + value;
+		}
+		else {
+			value = value.substring(2);
+			value = parseInt(value, 8);
+		}
 		o = true;
 	} //close before octal
 									
 	//Check to see if there's Binary involved.
 	else if (array[i].indexOf("0b") !== -1) {
-		value = value.substring(2);
-		value = parseInt(value, 2);
+		if (value.indexOf("-") !== -1) {
+			value = value.substring(3);
+			value = parseInt(value, 2);
+			value = "-" + value;
+		}
+		else {
+			value = value.substring(2);
+			value = parseInt(value, 2);
+		}
 		b = true;
 	} //close before octal
 	
@@ -261,7 +332,9 @@ function square(i, term, array) {
 		value = parseInt(value, 10);
 	}
 	
-	value = Math.sqrt(value);
+	if (which == 1) value = Math.sqrt(value);
+	if (which == 2) value = Math.abs(value);
+	
 	array[i] = value;
 					
 	if (h) array[i] = "0x" + array[i].toString(16);
@@ -271,6 +344,7 @@ function square(i, term, array) {
 	return array[i];
 }
 
+// Factorial
 function factorial(n) { 
 	var h = false;
 	var o = false;
