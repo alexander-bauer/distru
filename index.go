@@ -27,7 +27,7 @@ var (
 type Index struct {
 	Sites map[string]*site //A map of fully indexed webpages.
 	Cache []*page          //Pages that recently turned up in the search results
-	Queue chan string      `bencode:"-"` //The channel which controls Indexers
+	Queue chan string      `bencode:"-" json:"-"` //The channel which controls Indexers
 }
 
 type site struct {

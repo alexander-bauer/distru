@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 )
 
 var (
@@ -57,7 +58,13 @@ func GetConfig(filename string) *config {
 	if err != nil {
 		//If we got an error, then we were also
 		//given the default, so save it.
-		conf.save(filename)
+		log.Println("Failed to load config:", err)
+		log.Println("Saving default config to:", filename)
+		err = conf.save(filename)
+		if err != nil {
+			log.Println("Error saving config:", err)
+			log.Println("Using default config anyway")
+		}
 	}
 	return conf
 }

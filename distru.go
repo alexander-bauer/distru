@@ -1,13 +1,24 @@
 package main
 
-const (
-	Version  = "0.10.7"
-	ConfPath = "/etc/distru.conf"
+import (
+	"os"
 )
 
-var Conf *config
+const (
+	Version = "0.10.7"
+)
+
+var (
+	ConfPath = "/etc/distru.conf"
+	Conf     *config
+)
 
 func main() {
+	if len(os.Args) >= 2 {
+		//Load from the first argument if it's
+		//supplied.
+		ConfPath = os.Args[1]
+	}
 	Conf = GetConfig(ConfPath)
 	Serve(Conf)
 }
