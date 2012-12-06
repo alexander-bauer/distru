@@ -178,9 +178,6 @@ function power(term) {
 			array[i+1] = "";
 		}
 	}
-	
-	alert(term);
-	
 	term = array.join(" ");
 	term = fixSpaces(term);
 	if (term.indexOf("^") !== -1)
