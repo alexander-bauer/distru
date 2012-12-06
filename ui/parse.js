@@ -109,6 +109,7 @@ function fixSpaces(term) {
 	term = term.replace("-", " - ");
 	term = term.replace("*", " * ");
 	term = term.replace("/", " / ");
+	term = term.replace("^", " ^ ");
 	term = term.replace("!", " ! ");
 	term = term.replace("%", " % ");
 	term = term.replace(/\)/g, " ");
@@ -146,8 +147,8 @@ function convertToDecimal(term) {
 function evaluate(term) {
 	
 	for (var i = 0; i < term.length; i++) {
-		if (term.indexOf("^") !== -1) term = power(term);
-		else if (term.indexOf("!") !== -1) term = factorial(term);
+		if (term.indexOf("!") !== -1) term = factorial(term);
+		else if (term.indexOf("^") !== -1) term = power(term);
 		else if (term.indexOf("abs") !== -1) term = absv(term);
 		else if (term.indexOf("sqrt") !== -1) term = square(term);
 	}
@@ -171,11 +172,15 @@ function power(term) {
 	var array = term.split(" ");
 	for (var i = 0; i < array.length; i++) {
 		if (array[i].indexOf("^") !== -1) {
-			array[i] = Math.pow(array[i].substring(0, array[i].lastIndexOf("^")), array[i].substring(array[i].lastIndexOf("^")+1));
+			var result = Math.pow(array[i-1], array[i+1]);
+			array[i-1] = result;
+			array[i] = "";
+			array[i+1] = "";
 		}
 	}
 	
 	term = array.join(" ");
+	term = fixSpaces(term);
 	return term;
 }
 
@@ -212,6 +217,7 @@ function factorial(term) {
 	}
 	
 	term = array.join(" ");
+	term = fixSpaces(term);
 	return term;
 }
 
