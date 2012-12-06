@@ -109,9 +109,9 @@ function fixSpaces(term) {
 	term = term.replace("-", " - ");
 	term = term.replace("*", " * ");
 	term = term.replace("/", " / ");
-	term = term.replace("^", " ^ ");
-	term = term.replace("!", " ! ");
-	term = term.replace("%", " % ");
+	term = term.replace(/\^/g, " ^ ");
+	term = term.replace(/\!/g, " ! ");
+	term = term.replace(/%/g, " % ");
 	term = term.replace(/\)/g, " ");
 	term = term.replace(/\(/g, " ");
 	
@@ -156,14 +156,14 @@ function evaluate(term) {
 	term = eval(term);
 	
 	return term;
-}
+} // Close evaluate
 
 // The function putOnPage(term) puts the
 // term, evaluated and all, on the page
 // for all to see!
 function putOnPage(term) {
 	document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + term + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
-}
+} // Close putOnPage
 
 // The function power(term) checks the entire
 // equation for exponents, and does all of the
@@ -179,10 +179,14 @@ function power(term) {
 		}
 	}
 	
+	alert(term);
+	
 	term = array.join(" ");
 	term = fixSpaces(term);
+	if (term.indexOf("^") !== -1)
+		return power(term);
 	return term;
-}
+} // Close power
 
 // The function square(term) checks the entire
 // equation for square roots, and does all of the
@@ -190,7 +194,7 @@ function power(term) {
 function square(term) {
 	
 	return term;
-}
+} // Close square
 
 // The function absv(term) checks the entire
 // equation for absolute values, and does all of the
@@ -198,7 +202,7 @@ function square(term) {
 function absv(term) {
 	
 	return term;
-}
+} // Close absv
 
 // The function power(term) checks the entire
 // equation for factorials, and does all of the
@@ -219,7 +223,7 @@ function factorial(term) {
 	term = array.join(" ");
 	term = fixSpaces(term);
 	return term;
-}
+} // Close factorial
 
 // The function convertToBase(term, base) converts
 // each part of the equation from base 10 to
@@ -239,7 +243,7 @@ function convertToBase(term, base) {
 		else if (base == 16) term = "0x" + term;
 	}
 	return term;
-}
+} // Close convertToBase
 
 // The function unhideBubble() unhides the bubble!
 function unhideBubble() {
@@ -286,4 +290,4 @@ function removeTermBase(term) {
 		return term.replace("to hexadecimal","");
 	}
 	else return term;
-}
+} // Close removeTermBase
