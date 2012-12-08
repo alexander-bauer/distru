@@ -1,12 +1,9 @@
-//
-//	parse.js
-//
-
-
 // Parse that shit on load.
 window.onload=parse;
 var url = window.location.pathname
 var term = url.substring(url.indexOf(":9048/search/")+9);
+var base;
+var original;
 
 // The function parse() decides what to do with the term.
 // There are a few things that can be done. First, if it
@@ -14,7 +11,7 @@ var term = url.substring(url.indexOf(":9048/search/")+9);
 // div on the search page with the answer for the user.
 function parse() {
 	parseMath(term);
-}
+} // Close parse
 
 // The function parseMath(term) checks to see if the term
 // is a math equation or not. First, it should parse
@@ -25,366 +22,269 @@ function parse() {
 // not a real equation, then don't do the math.
 function parseMath(term) {
 	try {
-		// put it in lowercase so we don't have to deal
-		// with this shit being case sensitive and whatnot
-		term = term.toLowerCase()
-		term = decodeURIComponent(term);
 		
-		var operators = {"plus" : "+", "and" : "+", "minus" : "-", "times" : "*",
-						 "over" : "/", "divide" : "/", "mod" : "%", "modulus" : "%"};
-		
-		for (var val in operators) {
-			term = term.replace(new RegExp(val, "g"), operators[val]);
+		// TODO
+		// Check and see if it's really math.
+		// If it's really math, then fine, do the rest
+		// of it, but if not, then it shouldn't try
+		// and do math because that's just more calls
+		// that we don't need.
+				
+		term = fixOperators(term);
+		base = checkBase(term);
+		term = removeTermBase(term);
+		original = term;
+		term = fixSpaces(term);
+		term = convertToDecimal(term);
+		term = evaluate(term);
+		if (!isNaN(term)) {
+			term = convertToBase(term, base);	
+			putOnPage(term);
 		}
-		
-		//Fix spacing errors and put each thing in an array
-		term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
-		var original = term;
-		var array = term.split(" ");
-		
-		//Check to see if there's some more math we can do.
-		for (var i = 0; i < array.length; i++) {
-			if (array[i].indexOf("^") !== -1) {
-				array[i] = power(i, term, array);
-			}
-			else if (array[i].indexOf("sqrt") !== -1) {
-				array[i] = sqabs(i, term, array, 1);
-			}
-			else if (array[i].indexOf("!") !== -1) {
-				array[i] = factorial(array[i]);
-			}
-			else if (array[i].indexOf("abs") !== -1) {
-				array[i] = sqabs(i, term, array, 2);
-			}
-			//TODO: MORE.
-		}
-				
-		//put everything back into a string from the array
-		term = array.join(' ');		
-				
-		//Check to see if there's Hex involved.
-		if (term.indexOf("0x") !== -1){
-			doMath(16, "0x", term, original);
-		} //close hex
-		
-		//Check to see if there's Octal involved.
-		else if (term.indexOf("0o") !== -1) {
-			doMath(8, "0o", term, original);
-		} //close octal
-		
-		//Check to see if there's binary involved.
-		else if (term.indexOf("0b") !== -1) {
-			doMath(2, "0b", term, original);
-		} //close binary
-		
-		
-				
-		else
-		{
-		var value = eval(term);
-			if (!isNaN(value)) {
-				// display some html
-				 document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
-			}
-		} //close else
 	}
-	catch (e) {}
-}
+	catch (e) {
+		// just for debugging purposes right now
+		alert(e);
+	}
+} // Close parseMath
 
-// The function doMath(base, type, newterm) does math!
-// More specifically, it does hex, octal, and binary 
-// mathematical equations. 
-function doMath(base, type, newterm, original) {
-	term = newterm;
+// The function fixOperators(term) changes all word
+// operators with real operators so when doing math
+// everything is much, much easier. Plus (no pun intended),
+// it gives people more ways to do math
+function fixOperators(term) {
+	// I'm not dealing with case-sensitive shit
+	term = term.toLowerCase();
+	// This gets rid of the %20s and shit
+	term = decodeURIComponent(term);
+	
+	var operators = {"plus" : "+", "and" : "+", "minus" : "-", "times" : "*",
+					 "over" : "/", "divide" : "/", "mod" : "%", "modulus" : "%"};
+	
+	for (var val in operators) term = term.replace(new RegExp(val, "g"), operators[val]);
+	
+	return term;
+} // Close fixOperators
+
+// The function checkBase(term) checks to see what
+// base it should put the final result in at the end.
+function checkBase(term) {
+	if (term.indexOf("in binary") !== -1) return 2;
+	else if (term.indexOf("in octal") !== -1) return 8;
+	else if (term.indexOf("in decimal") !== -1) return 10;
+	else if (term.indexOf("in hex") !== -1 || term.indexOf("in hexadecimal") !== -1) return 16;
+	
+	var binary = term.indexOf("0b");
+	var octal = term.indexOf("0o");
+	var hex = term.indexOf("0x");
+
+	if (binary !== -1) {
+		if (octal !== -1) {
+			if (hex !== -1) {
+				if (binary < octal && binary < hex) return 2;
+				else if (octal < binary && octal < hex) return 8;
+				else return 16;
+			}
+			if (binary < octal) return 2;
+			else return 8;
+		}
+		return 2;
+	}
+	else if (octal !== -1) {
+		if (hex !== -1) {
+			if (octal < hex) return 8;
+			else return 16;
+		}
+		return 8;
+	}
+	else if (hex !== -1) return 16;
+	else return 10;
+} // Close checkBase
+
+// The function fixSpaces(term) fixes all
+// of the damn spacing errors that people
+// tend to do because they're assholes.
+function fixSpaces(term) {
 	term = term.replace("+", " + ");
 	term = term.replace("-", " - ");
 	term = term.replace("*", " * ");
 	term = term.replace("/", " / ");
-	term = term.replace("%", " % ");
+	term = term.replace(/\^/g, " ^ ");
+	term = term.replace(/\!/g, " ! ");
+	term = term.replace(/%/g, " % ");
+	term = term.replace(/\)/g, " ");
+	term = term.replace(/\(/g, " ");
 	
-	//THIS fIXES ALL DAMN SPACING ERRORS.
 	term = term.replace(/^\s+|\s+$/g,'').replace(/\s+/g,' ');
-		
+	
+	return term;	 
+} // Close fixSpaces
+
+// The function convertToDecimal(term) converts
+// each part of the equation from whatever base
+// it was at to base 10
+function convertToDecimal(term) {
 	var array = term.split(" ");
 	
-	var h = false;
-	var o = false;
-	var b = false;
-		
-	// Thanks to Prestaul of stack overflow
-	// http://stackoverflow.com/questions/57803/how-to-convert-decimal-to-hex-in-javascript
-	
 	for (var i = 0; i < array.length; i++) {
-		if (!(array[i] == "+" || array[i] == "-" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
+		if (!(array[i] == "+" || array[i] == "*" || array[i] == "/" || array[i] == "%")) {
 			if (array[i].length > 2) {
 				var temp = array[i].substring(2);
-				if (array[i].substring(0,2) == "0x") {
-					array[i] = parseInt(temp, 16);
-					h = true;
-				}
-				else if (array[i].substring(0,2) == "0o") {
-					array[i] = parseInt(temp, 8);
-					o = true;
-				}
-				else if (array[i].substring(0,2) == "0b") {
-					array[i] = parseInt(temp, 2);
-					b = true;
-				}
+				if (array[i].substring(0,2) == "0x") array[i] = parseInt(temp, 16);
+				else if (array[i].substring(0,2) == "0o") array[i] = parseInt(temp, 8);
+				else if (array[i].substring(0,2) == "0b") array[i] = parseInt(temp, 2);
 			}
 		}
 	}
 		
 	term = array.join(' ');
-						
-	var value = eval(term);
-	value = value.toString(base);
+	return term;
+} // Close convertToDecimal
+
+// The function evaluate(term) evaluates
+// the function by doing different types
+// of maths
+function evaluate(term) {
 	
-	switch (base) {
-		case 2:
-			value = "0b" + value;
-			break;
-		case 8:
-			value = "0o" + value;
-			break;
-		case 16:
-			value = "0x" + value;
-			break;
-		default:
-			value = "THISWILLNEVERHAPPEN";
+	for (var i = 0; i < term.length; i++) {
+		if (term.indexOf("!") !== -1) term = factorial(term);
+		else if (term.indexOf("^") !== -1) term = power(term);
+		else if (term.indexOf("abs") !== -1) term = absv(term);
+		else if (term.indexOf("sqrt") !== -1) term = square(term);
 	}
 	
-	if (value < 0) {
-		value = Math.abs(value);
-		value = "-" + type + value;
+	term = eval(term);
+	
+	return term;
+} // Close evaluate
+
+// The function putOnPage(term) puts the
+// term, evaluated and all, on the page
+// for all to see!
+function putOnPage(term) {
+	document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + term + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
+} // Close putOnPage
+
+// The function power(term) checks the entire
+// equation for exponents, and does all of the
+// exponents possible, then returns the term
+function power(term) {
+	var array = term.split(" ");
+	for (var i = 0; i < array.length; i++) {
+		if (array[i].indexOf("^") !== -1) {
+			var result = Math.pow(array[i-1], array[i+1]);
+			array[i-1] = result;
+			array[i] = "";
+			array[i+1] = "";
+		}
+	}
+	term = array.join(" ");
+	term = fixSpaces(term);
+	if (term.indexOf("^") !== -1)
+		return power(term);
+	return term;
+} // Close power
+
+// The function square(term) checks the entire
+// equation for square roots, and does all of the
+// square roots possible, then returns the term
+function square(term) {
+	
+	return term;
+} // Close square
+
+// The function absv(term) checks the entire
+// equation for absolute values, and does all of the
+// absolute values possible, then returns the term
+function absv(term) {
+	
+	return term;
+} // Close absv
+
+// The function power(term) checks the entire
+// equation for factorials, and does all of the
+// factorials possible, then returns the term
+function factorial(term) {
+	var array = term.split(" ");
+	for (var i = 0; i < array.length; i++) {
+		if (array[i].indexOf("!") !== -1) {
+			var result = 1;
+			for (var j = array[i-1]; j > 0; j--) {
+				result *= j;
+			}
+			array[i] = "";
+			array[i-1] = result;
+		}
 	}
 	
-	document.getElementById("blank").innerHTML = "<center><div class='calculate' onmouseover='unhideBubble();' onmouseout='hideBubble();'>" + original + " = <strong>" + value + "</strong></div><div class='bubble'><strong>What's this?</strong><br/>What you serached seemed to us like it was math, so we did the math for you!</div></center>";
-}
+	term = array.join(" ");
+	term = fixSpaces(term);
+	return term;
+} // Close factorial
+
+// The function convertToBase(term, base) converts
+// each part of the equation from base 10 to
+// whatever base it needs to be in
+function convertToBase(term, base) {
+	term = term.toString(base);
+	if (term.indexOf("-") == 0) {
+		term = term.replace("-", "");
+		if (base == 2) term = "0b" + term;
+		else if (base == 8) term = "0o" + term;
+		else if (base == 16) term = "0x" + term;
+		term = "-" + term;
+	}
+	else {
+		if (base == 2) term = "0b" + term;
+		else if (base == 8) term = "0o" + term;
+		else if (base == 16) term = "0x" + term;
+	}
+	return term;
+} // Close convertToBase
 
 // The function unhideBubble() unhides the bubble!
 function unhideBubble() {
 	document.getElementsByClassName("bubble").item(0).style.opacity = "1";
-}
+} // Close unhideBubble
 
 // The function hideBubble() hides the bubble!
 function hideBubble() {
 	document.getElementsByClassName("bubble").item(0).style.opacity = "0";
-}
+} // Close hideBubble
 
-// Power
-function power(i, term, array) {
-	var before = array[i].substring(0,array[i].indexOf("^"));
-	var after = array[i].substring(array[i].indexOf("^")+1);
-	var beforeo = false;
-	var beforeb = false;
-	var beforeh = false;
-	var befored = false;
-		
-	//Check to see if there's Hex involved.
-	if (array[i].indexOf("0x") !== -1 && before.indexOf("0x") !== -1) {
-		if (before.indexOf("-") !== -1) {
-			before = before.substring(3);
-			before = parseInt(before, 16);
-			before = "-" + before;
-		}
-		else {
-			before = before.substring(2);
-			before = parseInt(before, 16);
-		}
-		beforeh = true;
-	} //close before hex	
-		
-	//Check to see if there's Octal involved.
-	else if (array[i].indexOf("0o") !== -1 && before.indexOf("0o") !== -1) {
-		if (before.indexOf("-") !== -1) {
-			before = before.substring(3);
-			before = parseInt(before, 8);
-			before = "-" + before;
-		}
-		else {
-			before = before.substring(2);
-			before = parseInt(before, 8);
-		}
-		beforeo = true;
-	} //close before octal
-									
-	//Check to see if there's Binary involved.
-	else if (array[i].indexOf("0b") !== -1 && before.indexOf("0b") !== -1) {
-		if (before.indexOf("-") !== -1) {
-			before = before.substring(3);
-			before = parseInt(before, 2);
-			before = "-" + before;
-		}
-		else {
-			before = before.substring(2);
-			before = parseInt(before, 2);
-		}
-		beforeb = true;
-	} //close before octal
-	
-	else {
-		before = parseInt(before, 10);
-		befored = true;
+// The function removeTermBase(term) removes
+// any instance of "to binary", "in binary", ...
+// all the way up until hex.
+function removeTermBase(term) {
+	if (term.indexOf("in binary") !== -1) {
+		return term.replace("in binary","");
 	}
-	
-	if (array[i].indexOf("0x") !== -1 && after.indexOf("0x") !== -1) {
-		if (after.indexOf("-") !== -1) {
-			after = after.substring(3);
-			after = parseInt(after, 16);
-			after = "-" + after;
-		}
-		else {
-			after = after.substring(2);
-			after = parseInt(after, 16);
-		}
-	} //close after hex
-	
-	else if (array[i].indexOf("0o") !== -1 && after.indexOf("0o") !== -1) {
-		if (after.indexOf("-") !== -1) {
-			after = after.substring(3);
-			after = parseInt(after, 8);
-			after = "-" + after;
-		}
-		else {
-			after = after.substring(2);
-			after = parseInt(after, 8);
-		}
-	} //close after octal
-	
-	else if (array[i].indexOf("0b") !== -1 && after.indexOf("0b") !== -1) {
-		if (after.indexOf("-") !== -1) {
-			after = after.substring(3);
-			after = parseInt(after, 2);
-			after = "-" + after;
-		}
-		else {
-			after = after.substring(2);
-			after = parseInt(after, 2);
-		}
-	} //close after binary
-	
-	else {
-		after = parseInt(after, 10);
+	else if (term.indexOf("to binary") !== -1) {
+		return term.replace("to binary","");
 	}
-					
-	array[i] = Math.pow(before, after);
-					
-	if (beforeh) array[i] = "0x" + array[i].toString(16);
-	if (beforeo) array[i] = "0o" + array[i].toString(8);
-	if (beforeb) array[i] = "0b" + array[i].toString(2);
-	
-	return array[i];
-}
-
-// Square Root
-// Absolute Value
-function sqabs(i, term, array, which) {
-	var value;
-	if (which == 1) value = array[i].substring(array[i].indexOf("sqrt(")+5, array[i].indexOf(")"));
-	if (which == 2) value = array[i].substring(array[i].indexOf("abs(")+4, array[i].indexOf(")"));
-	var h = false;
-	var o = false;
-	var b = false;
-
-	//Check to see if there's Hex involved.
-	if (array[i].indexOf("0x") !== -1) {
-		if (value.indexOf("-") !== -1) {
-			value = value.substring(3);
-			value = parseInt(value, 16);
-			value = "-" + value;
-		}
-		else {
-			value = value.substring(2);
-			value = parseInt(value, 16);
-		}
-		h = true;
-	} //close before hex
-	
-	//Check to see if there's Octal involved.
-	else if (array[i].indexOf("0o") !== -1) {
-		if (value.indexOf("-") !== -1) {
-			value = value.substring(3);
-			value = parseInt(value, 8);
-			value = "-" + value;
-		}
-		else {
-			value = value.substring(2);
-			value = parseInt(value, 8);
-		}
-		o = true;
-	} //close before octal
-									
-	//Check to see if there's Binary involved.
-	else if (array[i].indexOf("0b") !== -1) {
-		if (value.indexOf("-") !== -1) {
-			value = value.substring(3);
-			value = parseInt(value, 2);
-			value = "-" + value;
-		}
-		else {
-			value = value.substring(2);
-			value = parseInt(value, 2);
-		}
-		b = true;
-	} //close before octal
-	
-	else {
-		value = parseInt(value, 10);
+	else if (term.indexOf("in octal") !== -1) {
+		return term.replace("in octal","");
 	}
-	
-	if (which == 1) value = Math.sqrt(value);
-	if (which == 2) value = Math.abs(value);
-	
-	array[i] = value;
-					
-	if (h) array[i] = "0x" + array[i].toString(16);
-	if (o) array[i] = "0o" + array[i].toString(8);
-	if (b) array[i] = "0b" + array[i].toString(2);
-	
-	return array[i];
-}
-
-// Factorial
-function factorial(n) { 
-	var h = false;
-	var o = false;
-	var b = false;
-	if (n.indexOf("!") !== -1) {
-		n = n.substring(0,n.indexOf("!"));
+	else if (term.indexOf("to octal") !== -1) {
+		return term.replace("to octal","");
 	}
-	
-	if (n < 0)
-		return "negativenumber";
-	
-	//Check to see if there's Hex involved.
-	if (n.indexOf("0x") !== -1) {
-		n = n.substring(2);
-		n = parseInt(n, 16);
-		h = true;
-	} //close before hex
-	
-	//Check to see if there's Octal involved.
-	else if (n.indexOf("0o") !== -1) {
-		n = n.substring(2);
-		n = parseInt(n, 8);
-		o = true;
-	} //close before octal
-									
-	//Check to see if there's Binary involved.
-	else if (n.indexOf("0b") !== -1) {
-		n = n.substring(2);
-		n = parseInt(n, 2);
-		b = true;
-	} //close before octal
-	
-	var result = 1;
-	for (var i = n; i > 0; i--) {
-		result *= i;
+	else if (term.indexOf("in decimal") !== -1) {
+		return term.replace("in decimal","");
 	}
-	
-	if (h) result = "0x" + result.toString(16);
-	if (o) result = "0o" + result.toString(8);
-	if (b) result = "0b" + result.toString(2);
-	
-	return result;
-}
+	else if (term.indexOf("to decimal") !== -1) {
+		return term.replace("to decimal","");
+	}
+	else if (term.indexOf("in hex") !== -1) {
+		return term.replace("in hex","");
+	}
+	else if (term.indexOf("in hexadecimal") !== -1) {
+		return term.replace("in hexadecimal","");
+	}
+	else if (term.indexOf("to hex") !== -1) {
+		return term.replace("to hex","");
+	}
+	else if (term.indexOf("to hexadecimal") !== -1) {
+		return term.replace("to hexadecimal","");
+	}
+	else return term;
+} // Close removeTermBase
