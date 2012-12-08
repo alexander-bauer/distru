@@ -8,12 +8,14 @@ import (
 	"strings"
 )
 
-func ServeWeb() {
+var webDir string
+
+func ServeWeb(conf *config) {
 	http.HandleFunc("/search/", searchHandler)
 	http.HandleFunc("/", frontpageHandler)
+	webDir = conf.WebDir
 	log.Println("Started webserver on port 9048.")
 	http.ListenAndServe(":9048", nil)
-
 }
 
 func searchHandler(w http.ResponseWriter, r *http.Request) {
@@ -33,16 +35,16 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("<-"+r.RemoteAddr+"> results:", len(results))
 
 	//load external files
-	css, err := ioutil.ReadFile("ui/search.css")
+	css, err := ioutil.ReadFile(webDir + "search.css")
 	if err != nil {
 		panic(err)
 	}
-	parseJS, err := ioutil.ReadFile("ui/parse.js")
+	parseJS, err := ioutil.ReadFile(webDir + "parse.js")
 	if err != nil {
 		panic(err)
 	}
 
-	searchJS, err := ioutil.ReadFile("ui/search.js")
+	searchJS, err := ioutil.ReadFile(webDir + "search.js")
 	if err != nil {
 		panic(err)
 	}
@@ -71,11 +73,11 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	//load external files
-	css, err := ioutil.ReadFile("ui/index.css")
+	css, err := ioutil.ReadFile(webDir + "index.css")
 	if err != nil {
 		panic(err)
 	}
-	javascript, err := ioutil.ReadFile("ui/search.js")
+	javascript, err := ioutil.ReadFile(webDir + "search.js")
 	if err != nil {
 		panic(err)
 	}

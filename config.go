@@ -10,6 +10,7 @@ var (
 	defaultConfig = &config{
 		Version:    Version,
 		Indexers:   1,
+		WebDir:     "ui/",
 		AutoIndex:  make([]string, 0),
 		Resources:  make([]string, 0),
 		ResTimeout: 8,
@@ -23,6 +24,7 @@ var (
 type config struct {
 	Version    string   //The Distru version that generated this config
 	Indexers   int      //The number of indexer processes that should be run
+	WebDir     string   //Directory containing stylesheets and webpages (including /)
 	AutoIndex  []string //A list of sites to index on startup
 	Resources  []string //A list of sites from which to request trusted indexes
 	ResTimeout int      //Number of seconds to wait for response from Resources
