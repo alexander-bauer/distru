@@ -1,7 +1,8 @@
 package main
 
 import (
-	"os"
+	"flag"
+	"log"
 )
 
 const (
@@ -13,12 +14,33 @@ var (
 	Conf     *config
 )
 
+var (
+	optDefLoc  = flag.Bool("confloc", false, "print the default config-load location and exit")
+	optGenConf = flag.Bool("genconf", false, "create a default config file")
+)
+
 func main() {
-	if len(os.Args) >= 2 {
+	flag.Parse()
+
+	if *optDefLoc {
+		println(ConfPath)
+		return
+	}
+
+	if flag.NArg() >= 1 {
 		//Load from the first argument if it's
 		//supplied.
-		ConfPath = os.Args[1]
+		ConfPath = flag.Arg(0)
 	}
+
+	if *optGenConf {
+		err := defaultConfig.save(ConfPath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		return
+	}
+
 	Conf = GetConfig(ConfPath)
 	Serve(Conf)
 }
