@@ -17,6 +17,7 @@ var (
 var (
 	optDefLoc  = flag.Bool("confloc", false, "print the default config-load location and exit")
 	optGenConf = flag.Bool("genconf", false, "create a default config file")
+	optWebDir  = flag.String("webdir", "", "WebDir to create a config with")
 )
 
 func main() {
@@ -34,6 +35,10 @@ func main() {
 	}
 
 	if *optGenConf {
+		Conf = defaultConfig
+		if len(*optWebDir) != 0 {
+			Conf.WebDir = *optWebDir
+		}
 		err := defaultConfig.save(ConfPath)
 		if err != nil {
 			log.Fatal(err)
