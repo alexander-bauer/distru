@@ -142,11 +142,14 @@ func Indexer(index *Index, pending <-chan string) {
 	}
 }
 
+//newSite completely indexes a site identified by a URL, which may be either fully qualified or not.
 func newSite(target string) *site {
-	target = "http://" + target
+	if !strings.HasPrefix(target, "http") {
+		target = "http://" + target
+	}
 
 	//Create an http.Client to control the webpage requests.
-	client := http.Client{}
+	client := *http.DefaultClient
 	//Use robotstxt to get the search engine permission.
 	rperm, _ := getRobotsPermission(target)
 
