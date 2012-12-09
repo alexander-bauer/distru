@@ -24,13 +24,7 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("<-" + r.RemoteAddr + "> searching \"" + searchTerms + "\"")
 
 	//Perform the search.
-	results, terms := Conf.Search(strings.Split(searchTerms, " "))
-
-	searchTerms = " "
-	for i := range terms {
-		//Redefine searchTerms with the filtered terms.
-		searchTerms += terms[i] + " "
-	}
+	results := Conf.Search(strings.Split(searchTerms, " "))
 
 	log.Println("<-"+r.RemoteAddr+"> results:", len(results))
 

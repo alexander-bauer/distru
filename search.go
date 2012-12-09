@@ -28,7 +28,7 @@ func (c *resultContainer) Swap(i, j int) {
 }
 
 //Conf.Search returns the total number of results, and a []*page containing at most maxResults number of results. It returns all of the terms searched on, (omitting duplicates.)
-func (conf *config) Search(terms []string) (results []*page, filteredTerms []string) {
+func (conf *config) Search(terms []string) (results []*page) {
 	index := conf.Idx
 
 	//Filter duplicate results through the use of maps.
@@ -36,12 +36,8 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 	for i := range terms {
 		termsMap[terms[i]] = nil
 	}
-	filteredTerms = make([]string, 0, len(termsMap))
-	for k := range termsMap {
-		filteredTerms = append(filteredTerms, k)
-	}
 
-	wordScore := uint64(0xffff / len(filteredTerms))
+	wordScore := uint64(0xffff / len(termsMap))
 
 	//Request indexes from all resources,
 	//and trust their results.
@@ -56,7 +52,7 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 			//of the word for a particular page. The number
 			//is currently discarded, because we can't rank
 			//the relevance of pages.
-			for _, term := range filteredTerms {
+			for term := range termsMap {
 				instances, isPresent := vv.WordCount[term]
 				if isPresent {
 					//We set the time here so we
@@ -103,5 +99,5 @@ func (conf *config) Search(terms []string) (results []*page, filteredTerms []str
 	sort.Sort(c)
 
 	conf.Idx.Cache = append(conf.Idx.Cache, c.Pages...)
-	return c.Pages, filteredTerms
+	return c.Pages
 }
