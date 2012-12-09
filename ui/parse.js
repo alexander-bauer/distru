@@ -1,6 +1,6 @@
 // Parse that shit on load.
 window.onload=parse;
-var url = window.location.pathname
+var url = window.location.pathname;
 var term = url.substring(url.indexOf(":9048/search/")+9);
 var base;
 var original;
@@ -43,8 +43,7 @@ function parseMath(term) {
 		}
 	}
 	catch (e) {
-		// just for debugging purposes right now
-		alert(e);
+		// Fuck errors
 	}
 } // Close parseMath
 
