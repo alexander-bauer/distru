@@ -10,6 +10,7 @@ var (
 	defaultConfig = &config{
 		Version:    Version,
 		Indexers:   1,
+		IndexFile:  "/tmp/distru.index",
 		WebDir:     "ui/",
 		AutoIndex:  make([]string, 0),
 		Resources:  make([]string, 0),
@@ -24,11 +25,12 @@ var (
 type config struct {
 	Version    string   //The Distru version that generated this config
 	Indexers   int      //The number of indexer processes that should be run
+	IndexFile  string   //The file to save the index to
 	WebDir     string   //Directory containing stylesheets and webpages (including /)
 	AutoIndex  []string //A list of sites to index on startup
 	Resources  []string //A list of sites from which to request trusted indexes
 	ResTimeout int      //Number of seconds to wait for response from Resources
-	Idx        *Index   `json:",omitempty"` //The local index
+	Idx        *Index   `json:"-"` //The local index
 }
 
 func (conf *config) save(filename string) error {

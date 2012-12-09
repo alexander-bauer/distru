@@ -5,6 +5,7 @@ import (
 	"github.com/temoto/robotstxt.go"
 	"github.com/zeebo/bencode"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -42,7 +43,7 @@ type page struct {
 	Time        string         //The time that this page was either indexed or recieved from another instance
 	Link        string         //The fully qualified link to this page
 	WordCount   map[string]int //Counts for every plaintext word on the webpage
-	relevance   uint64         //Internal unitless measure of relevance to most recent search result
+	relevance   uint64         `bencode:"-"` //Internal unitless measure of relevance to most recent search result
 }
 
 //Index.MergeRemote makes a raw distru request for the JSON encoded index of the given site, (which must have a full URI.) It will not overwrite local sites with remote ones unless trustNew is true. Additionally, it will time out the connection, and not modify the Index, after the number of seconds given in timeout. (0 will cause it to use net.Dial() normally.) It returns nil if successful, or returns an error if the remote site could not be reached, or produced an invalid index.
@@ -107,6 +108,17 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 	return nil
 }
 
+//Save bencodes the Index to the given path. It returns any errors.
+func (index *Index) Save(path string) (err error) {
+	var s string
+	s, err = bencode.EncodeString(index)
+	if err != nil {
+		return
+	}
+	err = ioutil.WriteFile(path, []byte(s), 0600)
+	return
+}
+
 //Writes a Bencoded stream to the provided io.Writer. (This can be a Conn object.)
 func (index *Index) Bencode(w io.Writer) error {
 	//Create an encoder for the io.Writer.
@@ -116,17 +128,17 @@ func (index *Index) Bencode(w io.Writer) error {
 
 //MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It sets index.Queue to a channel into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
 //To remove a site from the index, use delete(index.Sites, urlstring). To shut down the indexers, close() index.Queue.
-func MaintainIndex(index *Index, numIndexers int) {
+func MaintainIndex(index *Index, indexFile string, numIndexers int) {
 	//First, we're going to make the channel of pending sites.
 	index.Queue = make(chan string)
 
 	//Next, we're going to launch numIndexers amount of Indexers.
 	for i := 0; i < numIndexers; i++ {
-		go Indexer(index, index.Queue)
+		go Indexer(index, indexFile, index.Queue)
 	}
 }
 
-func Indexer(index *Index, pending <-chan string) {
+func Indexer(index *Index, indexFile string, pending <-chan string) {
 	for target := range pending {
 		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
@@ -139,6 +151,12 @@ func Indexer(index *Index, pending <-chan string) {
 		//Update the target site.
 		index.Sites[target] = newSite
 		log.Println("indexer> added \"" + target + "\"")
+		err := index.Save(indexFile)
+		if err != nil {
+			log.Println("indexer> error saving to "+indexFile+": ", err)
+		} else {
+			log.Println("indexer> saved to", indexFile)
+		}
 	}
 }
 
