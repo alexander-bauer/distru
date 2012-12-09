@@ -14,7 +14,7 @@ SETWEBDIR=--webdir $(WEBDIR)
 .DEFAULT_GOAL := distru
 
 distru:
-	$(COMPILER)
+	$(COMPILER) $(OPTIONS)
 
 .PHONY : clean
 clean  :
