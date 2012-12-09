@@ -40,9 +40,21 @@ func (conf *config) Search(terms []string) (results []*page) {
 	wordScore := uint64(0xffff / len(termsMap))
 
 	//Request indexes from all resources,
-	//and trust their results.
-	for i := range conf.Resources {
-		index.MergeRemote(conf.Resources[i], true, conf.ResTimeout)
+	//and trust their results. This is
+	//done concurrently.
+	workChan := make(chan bool)
+	workers := len(conf.Resources)
+	for _, resource := range conf.Resources {
+		go func(resource string, workChan chan<- bool) {
+			index.MergeRemote(resource, true, conf.ResTimeout)
+			workChan <- true
+		}(resource, workChan)
+	}
+	for _ = range workChan {
+		workers--
+		if workers == 0 {
+			close(workChan)
+		}
 	}
 
 	bareresults := make(map[string]*page)
