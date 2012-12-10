@@ -21,6 +21,12 @@ const (
 	AllowedType = "text/html"
 )
 
+//Sizes and limits
+const (
+	SiteExpiration = time.Hour * time.Duration(60)
+	queueSize      = 64
+)
+
 var (
 	DisallowedExtensions = []string{".png", ".jpg", ".gif"}
 )
@@ -32,7 +38,7 @@ type Index struct {
 }
 
 type site struct {
-	Time  string           //When the site finished indexing as Time.String()
+	Time  int64            //Unix time the site finished indexing as Time.String()
 	Pages map[string]*page //Nonordered map of pages on the server
 	Links []string         //List of all unique links collected from all pages on the site
 }
@@ -89,16 +95,7 @@ func (index *Index) MergeRemote(remote string, trustNew bool, timeout int) (err 
 		//the remote index is trusted, *and* newer than the
 		//local one, add the remote site to the local index.
 		_, isPresent = index.Sites[k]
-		localTime, err := time.Parse("ANSIC", v.Time)
-		if err != nil {
-			continue
-		}
-		remoteTime, err := time.Parse("ANSIC", index.Sites[k].Time)
-		if !isPresent || err != nil {
-			index.Sites[k] = v
-			continue
-		}
-		if trustNew && remoteTime.Before(localTime) {
+		if !isPresent || (trustNew && time.Unix(index.Sites[k].Time, 0).Before(time.Unix(v.Time, 0))) {
 			index.Sites[k] = v
 			continue
 		}
@@ -137,36 +134,49 @@ func (index *Index) Bencode(w io.Writer) error {
 	return enc.Encode(index)
 }
 
-//MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It sets index.Queue to a channel into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
-//To remove a site from the index, use delete(index.Sites, urlstring). To shut down the indexers, close() index.Queue.
-func MaintainIndex(index *Index, indexFile string, numIndexers int) {
+//Maintain creates a ticker and launches a goroutine to call Update(). The minuteDelay is the number of minutes between calls. It does not invoke Update() immediately upon starting. To force the Index to update immediately, invoke it.
+func (index *Index) Maintain(indexFile string, minuteDelay int) {
 	//First, we're going to make the channel of pending sites.
-	index.Queue = make(chan string)
+	index.Queue = make(chan string, queueSize)
+	ticker := time.NewTicker(time.Minute * time.Duration(minuteDelay))
 
-	//Next, we're going to launch numIndexers amount of Indexers.
-	for i := 0; i < numIndexers; i++ {
-		go Indexer(index, indexFile, index.Queue)
-	}
+	go func(ticker *time.Ticker) {
+		for _ = range ticker.C {
+			index.Update()
+			err := index.Save(indexFile)
+			if err != nil {
+				log.Println("Error saving", indexFile, ":", err)
+			} else {
+				log.Println("Saved", indexFile)
+			}
+		}
+	}(ticker)
 }
 
-func Indexer(index *Index, indexFile string, pending <-chan string) {
-	for target := range pending {
+func (index *Index) Update() {
+	update := func(target string) {
 		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
 		if newSite == nil {
 			//If we got an error for some reason,
 			log.Println("indexer> failed to add \"" + target + "\"")
 			//discard it and continue.
-			continue
+			return
 		}
 		//Update the target site.
 		index.Sites[target] = newSite
 		log.Println("indexer> added \"" + target + "\"")
-		err := index.Save(indexFile)
-		if err != nil {
-			log.Println("indexer> error saving to "+indexFile+": ", err)
-		} else {
-			log.Println("indexer> saved to", indexFile)
+	}
+
+	//Clear every item in the Queue
+	for len(index.Queue) > 0 {
+		target := <-index.Queue
+		update(target)
+	}
+
+	for link, site := range index.Sites {
+		if time.Since(time.Unix(site.Time, 0)) > SiteExpiration {
+			update(link)
 		}
 	}
 }
@@ -272,7 +282,7 @@ func newSite(target string) *site {
 	}
 
 	site := &site{
-		Time:  time.Now().String(),
+		Time:  time.Now().Unix(),
 		Pages: pages,
 		Links: linkArray,
 	}
