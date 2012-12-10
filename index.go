@@ -34,7 +34,8 @@ var (
 type Index struct {
 	Sites map[string]*site //A map of fully indexed webpages.
 	Cache []*page          //Pages that recently turned up in the search results
-	Queue chan string      `bencode:"-" json:"-"` //The channel which controls Indexers
+	Queue chan string      `bencode:"-"` //The channel which controls Indexers
+	mtn   bool             `bencode:"-"` //True if Maintain() is running for this Index
 }
 
 type site struct {
@@ -136,6 +137,13 @@ func (index *Index) Bencode(w io.Writer) error {
 
 //Maintain creates a ticker and launches a goroutine to call Update(). The minuteDelay is the number of minutes between calls. It does not invoke Update() immediately upon starting. To force the Index to update immediately, invoke it.
 func (index *Index) Maintain(indexFile string, minuteDelay int) {
+	//Protect against multiple calls to index.Maintain()
+	if index.mtn {
+		return
+	} else {
+		index.mtn = true
+	}
+
 	//First, we're going to make the channel of pending sites.
 	index.Queue = make(chan string, queueSize)
 	ticker := time.NewTicker(time.Minute * time.Duration(minuteDelay))
