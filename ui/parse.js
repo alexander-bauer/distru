@@ -188,7 +188,16 @@ function power(term) {
 // equation for square roots, and does all of the
 // square roots possible, then returns the term
 function square(term) {
+	var array = term.split(" ");
+	for (var i = array.length-1; i >= 0; i--) {
+		if (array[i].indexOf("sqrt") !== -1) {
+			array[i] = Math.sqrt(array[i+1]);
+			array[i+1] = "";
+		}
+	}
 	
+	term = array.join(" ");
+	term = fixSpaces(term);
 	return term;
 } // Close square
 
@@ -215,7 +224,7 @@ function factorial(term) {
 			array[i-1] = result;
 		}
 	}
-	
+	alert(array);
 	term = array.join(" ");
 	term = fixSpaces(term);
 	return term;
