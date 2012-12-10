@@ -38,7 +38,7 @@ func (conf *config) save(filename string) error {
 	if err != nil {
 		return err
 	}
-	return ioutil.WriteFile(filename, b, 0660)
+	return ioutil.WriteFile(filename, b, 0664)
 }
 
 func loadConf(filename string) (conf *config, err error) {
