@@ -119,6 +119,17 @@ func (index *Index) Save(path string) (err error) {
 	return
 }
 
+//LoadIndex reads a bencoded Index from the given path and returns a pointer to it.
+func LoadIndex(path string) (index *Index, err error) {
+	var b []byte
+	b, err = ioutil.ReadFile(path)
+	if err != nil {
+		return
+	}
+	err = bencode.DecodeString(string(b), &index)
+	return
+}
+
 //Writes a Bencoded stream to the provided io.Writer. (This can be a Conn object.)
 func (index *Index) Bencode(w io.Writer) error {
 	//Create an encoder for the io.Writer.

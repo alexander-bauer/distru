@@ -10,7 +10,7 @@ var (
 	defaultConfig = &config{
 		Version:    Version,
 		Indexers:   1,
-		IndexFile:  "/tmp/distru.index",
+		IndexFile:  "/var/distru.index",
 		WebDir:     "ui/",
 		AutoIndex:  make([]string, 0),
 		Resources:  make([]string, 0),
@@ -69,6 +69,16 @@ func GetConfig(filename string) *config {
 			log.Println("Error saving config:", err)
 			log.Println("Using default config anyway")
 		}
+	}
+	conf.Idx, err = LoadIndex(conf.IndexFile)
+	if err != nil {
+		conf.Idx = &Index{
+			Sites: make(map[string]*site, 0),
+			Cache: make([]*page, 0),
+		}
+		log.Println("Failed to load index from", conf.IndexFile+":", err)
+	} else {
+		log.Println("Loaded index from:", conf.IndexFile)
 	}
 	return conf
 }
