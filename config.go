@@ -9,7 +9,7 @@ import (
 var (
 	defaultConfig = &config{
 		Version:    Version,
-		IndexDelay: 5,
+		IndexDelay: 60,
 		IndexFile:  "/var/distru.index",
 		WebDir:     "ui/",
 		AutoIndex:  make([]string, 0),

@@ -142,18 +142,22 @@ func (index *Index) Maintain(indexFile string, minuteDelay int) {
 
 	go func(ticker *time.Ticker) {
 		for _ = range ticker.C {
-			index.Update()
-			err := index.Save(indexFile)
-			if err != nil {
-				log.Println("Error saving", indexFile, ":", err)
-			} else {
-				log.Println("Saved", indexFile)
+			//Update() will perform the updates,
+			//then return true if it changed the
+			//Index at all.
+			if index.Update() {
+				err := index.Save(indexFile)
+				if err != nil {
+					log.Println("Error saving", indexFile, ":", err)
+				} else {
+					log.Println("Saved", indexFile)
+				}
 			}
 		}
 	}(ticker)
 }
 
-func (index *Index) Update() {
+func (index *Index) Update() (changed bool) {
 	update := func(target string) {
 		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
@@ -165,6 +169,7 @@ func (index *Index) Update() {
 		}
 		//Update the target site.
 		index.Sites[target] = newSite
+		changed = true
 		log.Println("indexer> added \"" + target + "\"")
 	}
 
@@ -179,6 +184,7 @@ func (index *Index) Update() {
 			update(link)
 		}
 	}
+	return
 }
 
 //newSite completely indexes a site identified by a URL, which may be either fully qualified or not.
