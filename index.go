@@ -21,6 +21,12 @@ const (
 	AllowedType = "text/html"
 )
 
+//Sizes and limits
+const (
+	SiteExpiration = time.Hour * time.Duration(60)
+	queueSize      = 64
+)
+
 var (
 	DisallowedExtensions = []string{".png", ".jpg", ".gif"}
 )
@@ -137,36 +143,51 @@ func (index *Index) Bencode(w io.Writer) error {
 	return enc.Encode(index)
 }
 
-//MaintainIndex launches a number of goroutines which handle indexing of sites in sequence. It sets index.Queue to a channel into which target urls should be placed. When a new string is added to the returned chan, one of the next non-busy indexer will remove it from the chan and index it, and add the contents to the passed index. It will then forget about that site.
-//To remove a site from the index, use delete(index.Sites, urlstring). To shut down the indexers, close() index.Queue.
-func MaintainIndex(index *Index, indexFile string, numIndexers int) {
+//MaintainIndex creates a ticker and launches a goroutine to call UpdateIndex(). The minuteDelay is the number of minutes between calls. It does not invoke UpdateIndex() immediately upon starting.
+func (index *Index) MaintainIndex(indexFile string, minuteDelay int) {
 	//First, we're going to make the channel of pending sites.
-	index.Queue = make(chan string)
+	index.Queue = make(chan string, queueSize)
+	ticker := time.NewTicker(time.Minute * time.Duration(minuteDelay))
 
-	//Next, we're going to launch numIndexers amount of Indexers.
-	for i := 0; i < numIndexers; i++ {
-		go Indexer(index, indexFile, index.Queue)
-	}
+	go func(ticker *time.Ticker) {
+		for _ = range ticker.C {
+			index.UpdateIndex()
+			err := index.Save(indexFile)
+			if err != nil {
+				log.Println("Error saving", indexFile, ":", err)
+			} else {
+				log.Println("Saved", indexFile)
+			}
+		}
+	}(ticker)
 }
 
-func Indexer(index *Index, indexFile string, pending <-chan string) {
-	for target := range pending {
+func (index *Index) UpdateIndex() {
+	update := func(target string) {
 		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
 		if newSite == nil {
 			//If we got an error for some reason,
 			log.Println("indexer> failed to add \"" + target + "\"")
 			//discard it and continue.
-			continue
+			return
 		}
 		//Update the target site.
 		index.Sites[target] = newSite
 		log.Println("indexer> added \"" + target + "\"")
-		err := index.Save(indexFile)
-		if err != nil {
-			log.Println("indexer> error saving to "+indexFile+": ", err)
-		} else {
-			log.Println("indexer> saved to", indexFile)
+	}
+
+	//Clear every item in the Queue
+	for len(index.Queue) > 0 {
+		target := <-index.Queue
+		update(target)
+	}
+
+	for link, site := range index.Sites {
+		oldTime, err := time.Parse("ANSIC", site.Time)
+		if err != nil || time.Since(oldTime) > SiteExpiration {
+			println("error parsing time")
+			update(link)
 		}
 	}
 }

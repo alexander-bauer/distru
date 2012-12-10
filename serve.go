@@ -11,7 +11,7 @@ import (
 func Serve(conf *config) {
 	log.Println("Distru version", Version)
 	log.Println("Configuration status:\n\tGenerated in:\t", conf.Version,
-		"\n\tIndexers:\t", conf.Indexers,
+		"\n\tIndexDelay:\t", conf.IndexDelay,
 		"\n\tIndexFile:\t", conf.IndexFile,
 		"\n\tWebDir: \t", conf.WebDir,
 		"\n\tAutoIndexing:\t", len(conf.AutoIndex),
@@ -19,7 +19,7 @@ func Serve(conf *config) {
 		"\n\tSites indexed:\t", len(conf.Idx.Sites))
 
 	//Start the Index Maintainer for the index.
-	MaintainIndex(conf.Idx, conf.IndexFile, conf.Indexers)
+	conf.Idx.MaintainIndex(conf.IndexFile, conf.IndexDelay)
 
 	go func() {
 		for i := range conf.AutoIndex {

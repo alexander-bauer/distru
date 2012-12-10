@@ -9,7 +9,7 @@ import (
 var (
 	defaultConfig = &config{
 		Version:    Version,
-		Indexers:   1,
+		IndexDelay: 5,
 		IndexFile:  "/var/distru.index",
 		WebDir:     "ui/",
 		AutoIndex:  make([]string, 0),
@@ -24,7 +24,7 @@ var (
 
 type config struct {
 	Version    string   //The Distru version that generated this config
-	Indexers   int      //The number of indexer processes that should be run
+	IndexDelay int      //The number of minutes between UpdateIndex() checks
 	IndexFile  string   //The file to save the index to
 	WebDir     string   //Directory containing stylesheets and webpages (including /)
 	AutoIndex  []string //A list of sites to index on startup
