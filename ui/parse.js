@@ -205,7 +205,17 @@ function square(term) {
 // equation for absolute values, and does all of the
 // absolute values possible, then returns the term
 function absv(term) {
+	var array = term.split(" ");
+	for (var i = array.length-1; i >= 0; i--) {
+		if (array[i].indexOf("abs") !== -1) {
+			array[i] = Math.abs(array[i+2]);
+			array[i+1] = "";
+			array[i+2] = "";
+		}
+	}
 	
+	term = array.join(" ");
+	term = fixSpaces(term);
 	return term;
 } // Close absv
 
@@ -224,7 +234,6 @@ function factorial(term) {
 			array[i-1] = result;
 		}
 	}
-	alert(array);
 	term = array.join(" ");
 	term = fixSpaces(term);
 	return term;
