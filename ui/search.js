@@ -5,7 +5,7 @@
 //  where x is the search term(s)
 function searchThis() {
 	if (event.keyCode == 13) {
-		window.location = '/search/'+document.getElementById('search').value;
+		window.location = '/search/'+document.getElementById('search').value.replace(/%/g, "%25");
 	}
 }
 
@@ -18,7 +18,7 @@ function isEnter(e) {
     e = e || window.event || {};
     var charCode = e.charCode || e.keyCode || e.which;
         if (charCode == 13) {
-			window.location = '/search/'+document.getElementById('search').value;
+			window.location = '/search/'+document.getElementById('search').value.replace(/%/g, "%25");
         }
-
 }
+
