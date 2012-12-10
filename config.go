@@ -24,7 +24,7 @@ var (
 
 type config struct {
 	Version    string   //The Distru version that generated this config
-	IndexDelay int      //The number of minutes between UpdateIndex() checks
+	IndexDelay int      //The number of minutes between Update() checks
 	IndexFile  string   //The file to save the index to
 	WebDir     string   //Directory containing stylesheets and webpages (including /)
 	AutoIndex  []string //A list of sites to index on startup

@@ -134,15 +134,15 @@ func (index *Index) Bencode(w io.Writer) error {
 	return enc.Encode(index)
 }
 
-//MaintainIndex creates a ticker and launches a goroutine to call UpdateIndex(). The minuteDelay is the number of minutes between calls. It does not invoke UpdateIndex() immediately upon starting. To force the Index to update immediately, invoke it.
-func (index *Index) MaintainIndex(indexFile string, minuteDelay int) {
+//Maintain creates a ticker and launches a goroutine to call Update(). The minuteDelay is the number of minutes between calls. It does not invoke Update() immediately upon starting. To force the Index to update immediately, invoke it.
+func (index *Index) Maintain(indexFile string, minuteDelay int) {
 	//First, we're going to make the channel of pending sites.
 	index.Queue = make(chan string, queueSize)
 	ticker := time.NewTicker(time.Minute * time.Duration(minuteDelay))
 
 	go func(ticker *time.Ticker) {
 		for _ = range ticker.C {
-			index.UpdateIndex()
+			index.Update()
 			err := index.Save(indexFile)
 			if err != nil {
 				log.Println("Error saving", indexFile, ":", err)
@@ -153,7 +153,7 @@ func (index *Index) MaintainIndex(indexFile string, minuteDelay int) {
 	}(ticker)
 }
 
-func (index *Index) UpdateIndex() {
+func (index *Index) Update() {
 	update := func(target string) {
 		log.Println("indexer> adding \"" + target + "\"")
 		newSite := newSite(target)
