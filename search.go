@@ -95,28 +95,31 @@ func (conf *config) Search(terms []string) (results []*page) {
 							resemblance++
 						}
 					}
-					if float32(resemblance)/float32(len(longerTerm)) >= matchThreshold {
+					resemblanceM := float32(resemblance) / float32(len(longerTerm))
+					if resemblanceM >= matchThreshold {
 						if _, isFoundAlready := bareresults[kk]; !isFoundAlready {
 							//If not already there, add it.
-							oldTime, err := time.Parse("ANSIC", vv.Time)
-							if err == nil {
-								//The multiplier will be:
-								//12 divided by the number of hours since
-								//the result was last used, capped at one
-								//This means that it will be at most 1,
-								//but only if the result is newer than
-								//twelve hours old.
-								multiplier := 12 / time.Since(oldTime).Hours()
-								if multiplier > 1 {
-									multiplier = 1
-								}
-								if multiplier > 0 {
-									//If the multiplier is negative, then the
-									//timestamp is broken.
-									vv.relevance = uint64(float64(wordScore) * multiplier)
-								}
+
+							//The multiplier will be:
+							//12 divided by the number of hours since
+							//the result was last used, capped at one
+							//This means that it will be at most 1,
+							//but only if the result is newer than
+							//twelve hours old.
+							timeM := 12 / time.Since(time.Unix(vv.Time, 0)).Hours()
+							if timeM > 1 {
+								timeM = 1
 							}
-							vv.Time = time.Now().String()
+							if timeM > 0 {
+								//If the multiplier is negative, then the
+								//timestamp is broken.
+								vv.relevance = uint64(float64(wordScore) * timeM)
+							}
+							//Factor in the resemblance
+							vv.relevance *= uint64(100 * resemblanceM)
+
+							//And stamp it with the current time.
+							vv.Time = time.Now().Unix()
 
 							bareresults[kk] = vv
 						} else {

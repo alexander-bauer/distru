@@ -47,7 +47,7 @@ type site struct {
 type page struct {
 	Title       string         //The contents of the <title> tag
 	Description string         //The description of the page
-	Time        string         //The time that this page was either indexed or recieved from another instance
+	Time        int64          //Unix time that this page was either indexed or recieved from another instance
 	Link        string         //The fully qualified link to this page
 	WordCount   map[string]int //Counts for every plaintext word on the webpage
 	relevance   uint64         `bencode:"-"` //Internal unitless measure of relevance to most recent search result
