@@ -25,6 +25,7 @@ func Serve(conf *config) {
 		for i := range conf.AutoIndex {
 			conf.Idx.Queue <- conf.AutoIndex[i]
 		}
+		conf.Idx.Update()
 	}()
 
 	ln, err := net.Listen("tcp", ":9049")
