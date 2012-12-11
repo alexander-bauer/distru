@@ -23,7 +23,7 @@ const (
 
 //Sizes and limits
 const (
-	SiteExpiration = time.Hour * time.Duration(60)
+	SiteExpiration = time.Hour
 	queueSize      = 64
 )
 
@@ -188,7 +188,9 @@ func (index *Index) Update() (changed bool) {
 	}
 
 	for link, site := range index.Sites {
-		if time.Since(time.Unix(site.Time, 0)) > SiteExpiration {
+		age := time.Since(time.Unix(site.Time, 0))
+		if age > SiteExpiration {
+			log.Println("indexer> updating", age.Minutes(), "minute old site")
 			update(link)
 		}
 	}
