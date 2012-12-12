@@ -199,9 +199,43 @@ func (index *Index) Update() (changed bool) {
 
 //newSite completely indexes a site identified by a URL, which may be either fully qualified or not.
 func newSite(target string) *site {
-	if !strings.HasPrefix(target, "http") {
-		target = "http://" + target
+	var prefix string
+	//Parse the http or https, and
+	//set the prefix to that. Then
+	//set the target to the following
+	//part of the string.
+	parts := strings.Split(target, "/")
+	if len(parts) >= 2 && strings.HasPrefix(parts[0], "http") {
+		prefix = parts[0] + "//"
+		target = parts[1]
+
+	} else if len(parts) == 1 {
+		prefix = "http://"
+		target = parts[0]
+	} else {
+		return nil
 	}
+
+	//Now, resolve the IP to a hostname
+	//if possible.
+
+	//net.ParseIP() will be nil if the
+	//target is already not a hostname.
+	targetc := strings.TrimRight(strings.TrimLeft(target, "["), "]")
+	if net.ParseIP(targetc) != nil {
+		hostnames, err := net.LookupAddr(targetc)
+		if len(hostnames) > 0 {
+			log.Println("Resolved", parts[1], "to \""+hostnames[0]+"\"")
+			target = hostnames[0]
+		} else if err != nil {
+			log.Println("Error looking up \""+targetc+"\":", err)
+		}
+		//If there is no hostname associated
+		//with the IP address, then keep it as
+		//an IP address.
+	}
+
+	target = prefix + target
 
 	//Create an http.Client to control the webpage requests.
 	client := *http.DefaultClient
