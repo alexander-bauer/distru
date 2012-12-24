@@ -11,7 +11,7 @@ var (
 		Version:    Version,
 		IndexDelay: 60,
 		IndexFile:  "/var/distru.index",
-		WebDir:     "ui/",
+		WebDir:     "ui",
 		AutoIndex:  make([]string, 0),
 		Resources:  make([]string, 0),
 		ResTimeout: 8,

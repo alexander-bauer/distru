@@ -29,16 +29,16 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println("<-"+r.RemoteAddr+"> results:", len(results))
 
 	//load external files
-	css, err := ioutil.ReadFile(webDir + "search.css")
+	css, err := ioutil.ReadFile(webDir + "/search.css")
 	if err != nil {
 		panic(err)
 	}
-	parseJS, err := ioutil.ReadFile(webDir + "parse.js")
+	parseJS, err := ioutil.ReadFile(webDir + "/parse.js")
 	if err != nil {
 		panic(err)
 	}
 
-	searchJS, err := ioutil.ReadFile(webDir + "search.js")
+	searchJS, err := ioutil.ReadFile(webDir + "/search.js")
 	if err != nil {
 		panic(err)
 	}
@@ -67,11 +67,11 @@ func searchHandler(w http.ResponseWriter, r *http.Request) {
 
 func frontpageHandler(w http.ResponseWriter, r *http.Request) {
 	//load external files
-	css, err := ioutil.ReadFile(webDir + "index.css")
+	css, err := ioutil.ReadFile(webDir + "/index.css")
 	if err != nil {
 		panic(err)
 	}
-	javascript, err := ioutil.ReadFile(webDir + "search.js")
+	javascript, err := ioutil.ReadFile(webDir + "/search.js")
 	if err != nil {
 		panic(err)
 	}
