@@ -1,4 +1,4 @@
-![Distru](https://raw.github.com/SashaCrofter/distru/development/ui/logo.png)
+![Distru](https://raw.github.com/alexander-bauer/distru/development/ui/logo.png)
 
 **Distru** is a still **in-progress** tool, written in [Go](http://golang.org), designed to act as a distributed search engine for [Hyperboria](https://projectmeshnet.org). Distru is not a single "search engine server," but rather a small program designed to maintain information about nearby servers, so that Hyperboria nodes can quickly share discovered sites.
 
@@ -43,6 +43,6 @@ cd distru
 go build
 ```
 
-(*If you do not have a GitHub account, you may need to use* `https://github.com/SashaCrofter/distru.git` *instead.*) After using `go build`, the file `distru` will be executable and in the current directory. In the future, you may allow it to make an index, or run certain commands, but currently you can only scrape webpages for URLs. 
+(*If you do not have a GitHub account, you may need to use* `https://github.com/alexander-bauer/distru.git` *instead.*) After using `go build`, the file `distru` will be executable and in the current directory. In the future, you may allow it to make an index, or run certain commands, but currently you can only scrape webpages for URLs. 
 
 If you are going to develop Distru, please consider getting the [version-upping script](https://gist.github.com/4028865). This is primarily intended for major contributors to the repository, because of the confusion involved in merging versions and tags.
